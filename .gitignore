@@ -1,3 +1,4 @@
+!.idea/runConfigurations/*
 .gradle/
 .idea/
 build/
@@ -5,4 +6,4 @@ build/
 
 todo.txt
 
-!.idea/runConfigurations/*
+
