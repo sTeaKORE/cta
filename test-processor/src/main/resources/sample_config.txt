@@ -1,0 +1,10 @@
+[System]
+Name: todo
+
+[Parameter]
+bool(boolean): true, false
+enum(enum): test1,test2,test3
+range(int): 1,2,3,4,5,6,7,8,9,10
+
+[Constraint]
+
