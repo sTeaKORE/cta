@@ -6,12 +6,16 @@ import java.util.concurrent.TimeUnit
 
 class CTAGeneratorConnector() {
 
-    fun generateTestSet(configPath: String) {
-        val command = generateCommand(configPath)
+    fun generateTestSet(configPath: String, library: File) {
+        val (command, outputPath) = generateCommand(configPath, library)
         val directory = getResourceDirectory()
 
         val response = command.runCommand(directory)
         println(response)
+
+        val outputFile = File(outputPath)
+        val outputContent = outputFile.readText()
+        println(outputContent)
     }
 
     private fun getResourceDirectory(): File {
@@ -20,12 +24,17 @@ class CTAGeneratorConnector() {
         return cliBinaryFile.parentFile
     }
 
-    private fun generateCommand(configPath: String): String {
-        val binaryPath = this::class.java.classLoader.getResource("fipo-cli")
-        val binaryPathFile = File(binaryPath.path)
-        val binaryPathFilePath = binaryPathFile.absolutePath
+    private fun generateCommand(configPath: String, library: File): Pair<String, String> {
+        val binaryPath = this::class.java.classLoader.getResourceAsStream("fipo-cli")
+        binaryPath.use { input ->
+            library.outputStream().use { output ->
+                input.copyTo(output)
+            }
+        }
+        library.setExecutable(true)
+        val binaryPathFilePath = library.absolutePath
         val outputPath = configPath.getOutputPath()
-        return "$binaryPathFilePath -t 3 -i $configPath -o $outputPath --randomize"
+        return Pair("$binaryPathFilePath -t 3 -i $configPath -o $outputPath --randomize", outputPath)
     }
 
     companion object {
@@ -38,7 +47,8 @@ class CTAGeneratorConnector() {
 
 fun main() {
     val connector = CTAGeneratorConnector()
-    connector.generateTestSet("/home/steakor/uni/master/projekt/workload/build/generated/ksp/test/resources/TestClassACTSConfig.txt")
+    val libraryFile = File("/home/steakor/uni/master/projekt/workload/build/generated/ksp/test/resources/fipo-cli2")
+    connector.generateTestSet("/home/steakor/uni/master/projekt/workload/build/generated/ksp/test/resources/TestClassACTSConfig.txt", libraryFile)
 }
 
 fun String.runCommand(workingDir: File): String? {

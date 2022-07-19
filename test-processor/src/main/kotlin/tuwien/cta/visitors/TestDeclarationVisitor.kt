@@ -10,6 +10,7 @@ import tuwien.cta.util.LoggingUtil
 import tuwien.cta.util.appendText
 import tuwien.cta.input_model.CTAInputModel
 import tuwien.cta.template.createACTSemplate
+import java.io.File
 import java.io.FileNotFoundException
 
 class TestDeclarationVisitor(
@@ -54,7 +55,8 @@ class TestDeclarationVisitor(
                 inputModel = argumentDeclaration.accept(ConstraintAnnotationVisitor(codeGenerator, resolver, loggingUtil), inputModel)
                 loggingUtil.log("Received Input Model:\n$inputModel")
                 val pathToACTSFile = generateACTSFile(inputModel)
-                generatorConnector.generateTestSet(pathToACTSFile)
+                val libraryFile = generateLibraryFile()
+                generatorConnector.generateTestSet(pathToACTSFile, libraryFile)
             }
         }
     }
@@ -70,6 +72,24 @@ class TestDeclarationVisitor(
         val configFile = codeGenerator.generatedFile.find { it.name == "$filename.txt" }
         if (configFile != null) {
             return configFile.absolutePath
+        } else {
+            throw FileNotFoundException("Generated Config File not found")
+        }
+    }
+
+    private fun generateLibraryFile(): File {
+        val filename = "fipo-cli"
+        var libraryFile = codeGenerator.generatedFile.find { it.name == filename }
+        if (libraryFile != null) {
+            return libraryFile
+        }
+
+        val file = codeGenerator.createNewFile(Dependencies(false), "", filename, "")
+        file.close()
+
+        libraryFile = codeGenerator.generatedFile.find { it.name == filename }
+        if (libraryFile != null) {
+            return libraryFile
         } else {
             throw FileNotFoundException("Generated Config File not found")
         }
