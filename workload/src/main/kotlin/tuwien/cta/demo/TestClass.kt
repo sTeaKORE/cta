@@ -22,7 +22,7 @@ class TestClass {
     val boolean: Boolean = false
 
     @CTAEnum
-    val enum: TestClass.Example = TestClass.Example.Example1
+    val enum: Example = Example.Example1
 
     @CTAEnum(values = ["RED", "GREEN", "YELLOW"])
     val stringEnum: String = "RED"

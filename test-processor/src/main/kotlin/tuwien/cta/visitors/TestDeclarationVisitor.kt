@@ -6,10 +6,9 @@ import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.symbol.*
 import tuwien.cta.external.CTAGeneratorConnector
 import tuwien.cta.template.createTestTemplate
-import tuwien.cta.util.LoggingUtil
-import tuwien.cta.util.appendText
 import tuwien.cta.input_model.CTAInputModel
 import tuwien.cta.template.createACTSemplate
+import tuwien.cta.util.*
 import java.io.File
 import java.io.FileNotFoundException
 
@@ -62,37 +61,29 @@ class TestDeclarationVisitor(
     }
 
     private fun generateACTSFile(inputModel: CTAInputModel): String {
-        val filename = "${inputModel.systemName}${CTAGeneratorConnector.CONFIG_FILE_SUFFIX}"
+        val filename = inputModel.getFilenameNoExtension()
         val file = codeGenerator.createNewFile(Dependencies(false), "", filename, "txt")
 
         val actsTemplate = createACTSemplate(inputModel)
         file.appendText(actsTemplate)
         file.close()
 
-        val configFile = codeGenerator.generatedFile.find { it.name == "$filename.txt" }
-        if (configFile != null) {
-            return configFile.absolutePath
-        } else {
-            throw FileNotFoundException("Generated Config File not found")
-        }
+        val configFile = codeGenerator.generatedFile.find { it.name == inputModel.getFilenameWithExtension() }
+            ?: throw FileNotFoundException("Generated Config File not found")
+        return configFile.absolutePath
     }
 
     private fun generateLibraryFile(): File {
-        val filename = "fipo-cli"
-        var libraryFile = codeGenerator.generatedFile.find { it.name == filename }
-        if (libraryFile != null) {
-            return libraryFile
+        val filename = getLibraryName()
+        val existingLibraryFile = codeGenerator.generatedFile.find { it.name == filename }
+        if (existingLibraryFile != null) {
+            return existingLibraryFile
         }
 
-        val file = codeGenerator.createNewFile(Dependencies(false), "", filename, "")
-        file.close()
+        codeGenerator.createNewFile(Dependencies(false), "", filename, "").close()
 
-        libraryFile = codeGenerator.generatedFile.find { it.name == filename }
-        if (libraryFile != null) {
-            return libraryFile
-        } else {
-            throw FileNotFoundException("Generated Config File not found")
-        }
+        return codeGenerator.generatedFile.find { it.name == filename }
+            ?: throw FileNotFoundException("Generated Config File not found")
     }
 
     companion object {

@@ -14,6 +14,6 @@ class ATest {
     @CTATest(TestClass::class)
     fun testingTestClass() {}
 
-    @CTATest(ImportantClass::class)
+//    @CTATest(ImportantClass::class)
     fun testingImportantClass() {}
 }
