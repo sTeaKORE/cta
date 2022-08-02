@@ -4,6 +4,7 @@ import tuwien.cta.input_model.CTAInputModel
 
 const val CONFIG_FILE_SUFFIX = "ACTSConfig"
 const val OUTPUT_FILE_SUFFIX = "CAGENTestset"
+const val TEST_FILE_SUFFIX = "CTTest"
 const val TXT_ENDING = "txt"
 const val CSV_ENDING = "csv"
 
@@ -19,5 +20,7 @@ fun String.generateOutputFilePath(): String = this.reversed().replaceFirst(
 
 fun CTAInputModel.getFilenameNoExtension() = "${this.systemName}${CONFIG_FILE_SUFFIX}"
 fun CTAInputModel.getFilenameWithExtension() = "${this.systemName}${CONFIG_FILE_SUFFIX}.$TXT_ENDING"
+
+fun CTAInputModel.getTestFilename() = "${this.systemName}${TEST_FILE_SUFFIX}"
 
 fun getLibraryName(): String = CT_LIBRARY

@@ -4,6 +4,7 @@ class CTAInputModel(val systemName: String) {
 
     private val parameters: MutableList<CTAAbstractParameter> = mutableListOf()
     private val constraints: MutableList<CTAIfConstraint> = mutableListOf()
+    private var testSet: List<List<String>> = emptyList()
 
     private var parameterType: String = ""
     private var name: String = ""
@@ -14,6 +15,10 @@ class CTAInputModel(val systemName: String) {
 
     fun addConstraint(constraint: CTAIfConstraint) {
         constraints.add(constraint)
+    }
+
+    fun setTestSet(testSet: List<List<String>>) {
+        this.testSet = testSet
     }
 
     fun getParameters(): String {
@@ -41,6 +46,19 @@ class CTAInputModel(val systemName: String) {
         val name = this.name
         this.name = ""
         return Pair(parameterType, name)
+    }
+
+    fun getTestset(): String {
+        val stringBuilder = StringBuilder()
+        stringBuilder.append("TestSet:\n\n")
+        testSet.forEach { testSetEntry ->
+            testSetEntry.forEachIndexed { i, testSetValue ->
+                val parameter = parameters.get(i)
+                stringBuilder.append("${parameter.getName()} = $testSetValue  ")
+            }
+            stringBuilder.append("\n")
+        }
+        return stringBuilder.toString()
     }
 
     override fun toString(): String {

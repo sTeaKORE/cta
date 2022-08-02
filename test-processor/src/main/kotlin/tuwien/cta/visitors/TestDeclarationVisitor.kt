@@ -1,5 +1,6 @@
 package tuwien.cta.visitors
 
+import com.github.doyaaaaaken.kotlincsv.dsl.csvReader
 import com.google.devtools.ksp.processing.CodeGenerator
 import com.google.devtools.ksp.processing.Dependencies
 import com.google.devtools.ksp.processing.Resolver
@@ -55,9 +56,22 @@ class TestDeclarationVisitor(
                 loggingUtil.log("Received Input Model:\n$inputModel")
                 val pathToACTSFile = generateACTSFile(inputModel)
                 val libraryFile = generateLibraryFile()
-                generatorConnector.generateTestSet(pathToACTSFile, libraryFile)
+                val testSetFile = generatorConnector.generateTestSet(pathToACTSFile, libraryFile)
+                val testSet = csvReader().readAll(testSetFile)
+                inputModel.setTestSet(testSet)
+                val testSetString = inputModel.getTestset()
+                loggingUtil.log(testSetString)
+                generateTest(inputModel, argumentDeclaration)
             }
         }
+    }
+
+    private fun generateTest(inputModel: CTAInputModel, classToTest: KSClassDeclaration) {
+        val fileName = inputModel.getTestFilename()
+        val testFile = codeGenerator.createNewFile(Dependencies(false), classToTest.packageName.asString(), fileName)
+        val testTemplate = createTestTemplate(inputModel, classToTest, fileName)
+        testFile.appendText("$testTemplate\n")
+        testFile.close()
     }
 
     private fun generateACTSFile(inputModel: CTAInputModel): String {
