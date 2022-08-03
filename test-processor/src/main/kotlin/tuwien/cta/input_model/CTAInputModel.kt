@@ -21,13 +21,8 @@ class CTAInputModel(val systemName: String) {
         this.testSet = testSet
     }
 
-    fun getParameters(): String {
-        val parameterBuilder = StringBuilder()
-        for (parameter in parameters) {
-            parameterBuilder.append(parameter.getACTSString())
-            parameterBuilder.append("\n")
-        }
-        return parameterBuilder.toString()
+    fun getTestSet(): List<List<String>> {
+        return testSet
     }
 
     fun getConstraints(): String {
@@ -48,17 +43,45 @@ class CTAInputModel(val systemName: String) {
         return Pair(parameterType, name)
     }
 
-    fun getTestset(): String {
+    fun getParametersString(): String {
+        val parameterBuilder = StringBuilder()
+        for (parameter in parameters) {
+            parameterBuilder.append(parameter.getACTSString())
+            parameterBuilder.append("\n")
+        }
+        return parameterBuilder.toString()
+    }
+
+    fun getTestsetString(): String {
         val stringBuilder = StringBuilder()
         stringBuilder.append("TestSet:\n\n")
         testSet.forEach { testSetEntry ->
-            testSetEntry.forEachIndexed { i, testSetValue ->
-                val parameter = parameters.get(i)
+            testSetEntry.forEachIndexed { index, testSetValue ->
+                val parameter = parameters[index]
                 stringBuilder.append("${parameter.getName()} = $testSetValue  ")
             }
             stringBuilder.append("\n")
         }
         return stringBuilder.toString()
+    }
+
+    fun getTestSetArguments(): List<String> {
+        val testSetArguments = mutableListOf<String>()
+        val stringBuilder = StringBuilder()
+        testSet.forEach { testSetEntry ->
+            testSetEntry.forEachIndexed { index, testSetValue ->
+                val parameter = parameters[index]
+                if(parameter is CTAEnumParameter) {
+                    stringBuilder.append("\"$testSetValue\", ")
+                } else {
+                    stringBuilder.append("$testSetValue, ")
+                }
+            }
+            stringBuilder.setLength(stringBuilder.length - 2)
+            testSetArguments.add(stringBuilder.toString())
+            stringBuilder.clear()
+        }
+        return testSetArguments
     }
 
     override fun toString(): String {

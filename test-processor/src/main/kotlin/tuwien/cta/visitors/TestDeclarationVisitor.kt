@@ -59,7 +59,7 @@ class TestDeclarationVisitor(
                 val testSetFile = generatorConnector.generateTestSet(pathToACTSFile, libraryFile)
                 val testSet = csvReader().readAll(testSetFile)
                 inputModel.setTestSet(testSet)
-                val testSetString = inputModel.getTestset()
+                val testSetString = inputModel.getTestsetString()
                 loggingUtil.log(testSetString)
                 generateTest(inputModel, argumentDeclaration)
             }

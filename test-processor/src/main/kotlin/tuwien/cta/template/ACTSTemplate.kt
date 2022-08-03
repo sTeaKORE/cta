@@ -3,7 +3,7 @@ package tuwien.cta.template
 import tuwien.cta.input_model.CTAInputModel
 
 fun createACTSemplate(inputModel: CTAInputModel): String {
-    val parameters = inputModel.getParameters()
+    val parameters = inputModel.getParametersString()
     val templateBuilder = StringBuilder()
     templateBuilder.append("[System]\n")
     templateBuilder.append("Name: ${inputModel.systemName}\n")
