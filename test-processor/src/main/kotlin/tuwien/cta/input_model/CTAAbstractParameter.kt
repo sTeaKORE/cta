@@ -4,7 +4,9 @@ abstract class CTAAbstractParameter(private val name: String) {
 
     abstract fun getACTSString(): String
 
-    fun getName(): String {
+    abstract fun getVariableString(): String
+
+    fun getParameterName(): String {
         return name
     }
 }

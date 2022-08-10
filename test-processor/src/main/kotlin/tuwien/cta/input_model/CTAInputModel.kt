@@ -13,6 +13,10 @@ class CTAInputModel(val systemName: String) {
         parameters.add(parameter)
     }
 
+    fun getParameters(): List<CTAAbstractParameter> {
+        return parameters
+    }
+
     fun addConstraint(constraint: CTAIfConstraint) {
         constraints.add(constraint)
     }
@@ -58,7 +62,7 @@ class CTAInputModel(val systemName: String) {
         testSet.forEach { testSetEntry ->
             testSetEntry.forEachIndexed { index, testSetValue ->
                 val parameter = parameters[index]
-                stringBuilder.append("${parameter.getName()} = $testSetValue  ")
+                stringBuilder.append("${parameter.getParameterName()} = $testSetValue  ")
             }
             stringBuilder.append("\n")
         }
@@ -72,6 +76,8 @@ class CTAInputModel(val systemName: String) {
             testSetEntry.forEachIndexed { index, testSetValue ->
                 val parameter = parameters[index]
                 if(parameter is CTAEnumParameter) {
+                    stringBuilder.append("${parameter.getEnumPrefix()}$testSetValue, ")
+                } else if (parameter is CTAStringEnumParameter) {
                     stringBuilder.append("\"$testSetValue\", ")
                 } else {
                     stringBuilder.append("$testSetValue, ")

@@ -33,7 +33,7 @@ class CTAParameterGenerator {
         val annotationParentNode = annotation.parent as KSPropertyDeclaration
         val annotationParentNodeType = annotationParentNode.type.resolve().declaration as KSClassDeclaration
         val enumValues = annotationParentNodeType.declarations.toList().filterIsInstance<KSClassDeclaration>().map { it.simpleName.asString() }
-        return CTAEnumParameter(name, enumValues)
+        return CTAEnumParameter(name, enumValues, annotationParentNodeType.simpleName.asString(), annotationParentNodeType.packageName.asString())
     }
 
     fun generateStringEnum(annotation: KSAnnotation, name: String): CTAAbstractParameter {
@@ -41,7 +41,7 @@ class CTAParameterGenerator {
         if (valuesArgument != null) {
             val valuesList = (valuesArgument.value as List<*>).filterIsInstance<String>()
             if (valuesList.isNotEmpty()) {
-                return CTAEnumParameter(name, valuesList)
+                return CTAStringEnumParameter(name, valuesList)
             }
         }
         throw InvalidAnnotationException("missing argument on annotation")

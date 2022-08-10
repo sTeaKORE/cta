@@ -27,7 +27,8 @@ fun createTestTemplate(inputModel: CTAInputModel, classToTest: KSClassDeclaratio
         packageName,
         className,
         testClass,
-        testSetList
+        testSetList,
+        inputModel.getParameters()
     )
 
     return parseTemplate(templateSource)
@@ -41,14 +42,14 @@ private fun parseTemplate(templateSource: TestTemplateSource) =
     import org.junit.jupiter.params.provider.Arguments
     import org.junit.jupiter.params.provider.MethodSource
     import java.util.stream.Stream
-    import ${templateSource.getImport()}
+    ${templateSource.getImport().joinToString(separator = "\n") { "import $it" }}
     
     class ${templateSource.testClassName} {
 
         @ParameterizedTest
         @MethodSource("testArguments")
         fun testingClass(input: ${templateSource.classToTest}) {
-            println("success")
+            println("Executing Test with Parameters: " + input.toString())
         }
         
         companion object {
@@ -58,8 +59,8 @@ private fun parseTemplate(templateSource: TestTemplateSource) =
             )
             
             @JvmStatic
-            private fun create${templateSource.classToTest}(): ${templateSource.classToTest} {
-                return ${templateSource.classToTest}()
+            private fun create${templateSource.classToTest}(${templateSource.getParameterString()}): ${templateSource.classToTest} {
+                ${templateSource.getInitializingFunction()}
             }
         }
         
