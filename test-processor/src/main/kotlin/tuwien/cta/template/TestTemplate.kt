@@ -42,6 +42,7 @@ private fun parseTemplate(templateSource: TestTemplateSource) =
     import org.junit.jupiter.params.provider.Arguments
     import org.junit.jupiter.params.provider.MethodSource
     import java.util.stream.Stream
+    import tuwien.cta.demo.FunctionClass
     ${templateSource.getImport().joinToString(separator = "\n") { "import $it" }}
     
     class ${templateSource.testClassName} {
@@ -50,6 +51,8 @@ private fun parseTemplate(templateSource: TestTemplateSource) =
         @MethodSource("testArguments")
         fun testingClass(input: ${templateSource.classToTest}) {
             println("Executing Test with Parameters: " + input.toString())
+            val test = FunctionClass()
+            test.testingFunction(input)
         }
         
         companion object {

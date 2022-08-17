@@ -1,6 +1,7 @@
 package tuwien.cta.annotation.test
 
 import kotlin.reflect.KClass
+import kotlin.reflect.KFunction
 
-@Target(allowedTargets = [AnnotationTarget.FUNCTION])
-annotation class CTATest(val testingClass: KClass<*>)
+@Target(allowedTargets = [AnnotationTarget.PROPERTY])
+annotation class CTATest()
