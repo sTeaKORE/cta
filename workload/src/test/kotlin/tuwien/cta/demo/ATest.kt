@@ -2,7 +2,8 @@ package tuwien.cta.demo
 
 import org.junit.jupiter.api.Test
 import tuwien.cta.annotation.test.CTATest
-import tuwien.cta.annotation.test.CTATestConfig
+import tuwien.cta.annotation.test.CTATestContainer
+import kotlin.reflect.KFunction
 
 class ATest {
 
@@ -12,13 +13,15 @@ class ATest {
 
     }
 
-    fun oracle(result: String): Boolean {
-        return true
-    }
-
-//    @CTATest(ImportantClass::class)
-    fun testingImportantClass() {}
+    @CTATest(CTATestContainerImpl::class, TestClass::class)
+    fun testingTestClass() {}
 }
 
-@CTATest
-val firstTest = CTATestConfig(TestClass::class, FunctionClass::testingFunction, ATest::oracle)
+class CTATestContainerImpl: CTATestContainer {
+
+    override var testMethod: KFunction<*> = FunctionClass()::testingFunction
+
+    override fun oracle(output: String): Boolean {
+        return true
+    }
+}

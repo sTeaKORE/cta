@@ -8,6 +8,7 @@ class TestTemplateSource(
     val testClassName: String,
     val classToTest: String,
     val testCasesList: List<String>,
+    val containerClass: String,
     private val parameters: List<CTAAbstractParameter>
 ) {
     fun getImport(): List<String> {

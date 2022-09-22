@@ -17,7 +17,7 @@ class TestDeclarationVisitor(
     private val codeGenerator: CodeGenerator,
     private val resolver: Resolver,
     private val loggingUtil: LoggingUtil
-): KSVisitorVoid() {
+) : KSVisitorVoid() {
 
     private val knownAnnotations = listOf("CTATest")
     private val generatorConnector = CTAGeneratorConnector()
@@ -43,33 +43,60 @@ class TestDeclarationVisitor(
 
     override fun visitAnnotation(annotation: KSAnnotation, data: Unit) {
         loggingUtil.log("Visiting Annotation - ${annotation.shortName.asString()}")
-        for (argument: KSValueArgument in annotation.arguments) {
-            loggingUtil.log("Annotation Argument:\n  Name - ${argument.name?.asString()}\n  Value - ${argument.value}")
-            val argumentType = argument.value as KSType
-            val argumentDeclaration = argumentType.declaration
-            loggingUtil.log("Found Declaration (class, function, value) in annotation:\n  " +
-                    "Name - ${argumentDeclaration.simpleName.asString()}\n  Package - ${argumentDeclaration.packageName.asString()}")
-            if (argumentDeclaration is KSClassDeclaration) {
-                loggingUtil.log("Declaration is Class Annotation => accepting Declaration")
-                var inputModel = CTAInputModel(argumentDeclaration.simpleName.asString())
-                inputModel = argumentDeclaration.accept(ConstraintAnnotationVisitor(codeGenerator, resolver, loggingUtil), inputModel)
-                loggingUtil.log("Received Input Model:\n$inputModel")
-                val pathToACTSFile = generateACTSFile(inputModel)
-                val libraryFile = generateLibraryFile()
-                val testSetFile = generatorConnector.generateTestSet(pathToACTSFile, libraryFile)
-                val testSet = csvReader().readAll(testSetFile)
-                inputModel.setTestSet(testSet)
-                val testSetString = inputModel.getTestsetString()
-                loggingUtil.log(testSetString)
-                generateTest(inputModel, argumentDeclaration)
+        var containerClass = ""
+
+        val container = annotation.arguments.find {
+            val argumentName = it.name
+            argumentName != null && argumentName.asString() == CTA_CONTAINER_ARGUMENT
+        } ?: return
+        val containerType = container.value as KSType
+        val containerDeclaration = containerType.declaration
+        if (containerDeclaration is KSClassDeclaration) {
+            containerClass = containerDeclaration.simpleName.asString()
+        } else {
+            return
+        }
+
+
+        val inputAnnotations = annotation.arguments.filter {
+            val argumentName = it.name
+            argumentName != null && argumentName.asString() == CTA_INPUTMODEL_ARGUMENT
+        }
+        for (argumentList: KSValueArgument in inputAnnotations) {
+            val argumentList2 = argumentList.value as List<KSType>
+            for (argument in argumentList2) {
+//                loggingUtil.log("Annotation Argument:\n  Name - ${argument.name?.asString()}\n  Value - ${argument.value}")
+                val argumentType = argument
+                val argumentDeclaration = argumentType.declaration
+                loggingUtil.log(
+                    "Found Declaration (class, function, value) in annotation:\n  " +
+                            "Name - ${argumentDeclaration.simpleName.asString()}\n  Package - ${argumentDeclaration.packageName.asString()}"
+                )
+                if (argumentDeclaration is KSClassDeclaration) {
+                    loggingUtil.log("Declaration is Class Annotation => accepting Declaration")
+                    var inputModel = CTAInputModel(argumentDeclaration.simpleName.asString())
+                    inputModel = argumentDeclaration.accept(
+                        ConstraintAnnotationVisitor(codeGenerator, resolver, loggingUtil),
+                        inputModel
+                    )
+                    loggingUtil.log("Received Input Model:\n$inputModel")
+                    val pathToACTSFile = generateACTSFile(inputModel)
+                    val libraryFile = generateLibraryFile()
+                    val testSetFile = generatorConnector.generateTestSet(pathToACTSFile, libraryFile)
+                    val testSet = csvReader().readAll(testSetFile)
+                    inputModel.setTestSet(testSet)
+                    val testSetString = inputModel.getTestsetString()
+                    loggingUtil.log(testSetString)
+                    generateTest(inputModel, argumentDeclaration, containerClass)
+                }
             }
         }
     }
 
-    private fun generateTest(inputModel: CTAInputModel, classToTest: KSClassDeclaration) {
+    private fun generateTest(inputModel: CTAInputModel, classToTest: KSClassDeclaration, inputContainer: String) {
         val fileName = inputModel.getTestFilename()
         val testFile = codeGenerator.createNewFile(Dependencies(false), classToTest.packageName.asString(), fileName)
-        val testTemplate = createTestTemplate(inputModel, classToTest, fileName)
+        val testTemplate = createTestTemplate(inputModel, classToTest, fileName, inputContainer)
         testFile.appendText("$testTemplate\n")
         testFile.close()
     }
@@ -102,5 +129,7 @@ class TestDeclarationVisitor(
 
     companion object {
         val visited = mutableListOf<String>()
+        const val CTA_CONTAINER_ARGUMENT = "testContainer"
+        const val CTA_INPUTMODEL_ARGUMENT = "classToTest"
     }
 }

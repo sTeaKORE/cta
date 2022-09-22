@@ -18,7 +18,7 @@ fun createTestTemplate(packageName: String, className: String): String =
     }     
     """.trimIndent()
 
-fun createTestTemplate(inputModel: CTAInputModel, classToTest: KSClassDeclaration, className: String): String {
+fun createTestTemplate(inputModel: CTAInputModel, classToTest: KSClassDeclaration, className: String, containerClass: String): String {
     val packageName = classToTest.packageName.asString()
     val testClass = classToTest.simpleName.asString()
     val testSetList = inputModel.getTestSetArguments()
@@ -28,6 +28,7 @@ fun createTestTemplate(inputModel: CTAInputModel, classToTest: KSClassDeclaratio
         className,
         testClass,
         testSetList,
+        containerClass,
         inputModel.getParameters()
     )
 
@@ -51,8 +52,9 @@ private fun parseTemplate(templateSource: TestTemplateSource) =
         @MethodSource("testArguments")
         fun testingClass(input: ${templateSource.classToTest}) {
             println("Executing Test with Parameters: " + input.toString())
-            val test = FunctionClass()
-            test.testingFunction(input)
+            val test = ${templateSource.containerClass}()
+            test.testMethod.call(input)
+            test.oracle("testing")
         }
         
         companion object {
