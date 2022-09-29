@@ -1,6 +1,11 @@
-package tuwien.cta.input_model
+package tuwien.cta.input_model.parameters
 
-class CTAEnumParameter(private val name: String, private val values: List<String>, private val type: String, private val packageName: String): CTAAbstractParameter(name) {
+class CTAEnumParameter(
+    private val name: String,
+    private val values: List<String>,
+    private val type: String,
+    private val packageName: String
+) : CTAAbstractParameter(name) {
 
     override fun getACTSString(): String {
         return "$name(enum): ${values.joinToString()}"

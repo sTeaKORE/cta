@@ -4,6 +4,7 @@ import com.google.devtools.ksp.symbol.KSAnnotation
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import tuwien.cta.exception.InvalidAnnotationException
+import tuwien.cta.input_model.parameters.*
 
 class CTAParameterGenerator {
 

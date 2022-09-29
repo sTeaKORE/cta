@@ -1,3 +1,3 @@
 package tuwien.cta.annotation.constraint
 
-annotation class CTABoolean()
+annotation class CTABoolean

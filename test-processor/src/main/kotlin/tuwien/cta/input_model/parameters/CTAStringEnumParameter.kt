@@ -1,4 +1,4 @@
-package tuwien.cta.input_model
+package tuwien.cta.input_model.parameters
 
 class CTAStringEnumParameter(private val name: String, private val values: List<String>): CTAAbstractParameter(name) {
 

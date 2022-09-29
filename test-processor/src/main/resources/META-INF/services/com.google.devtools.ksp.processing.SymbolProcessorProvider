@@ -1,2 +1,2 @@
 tuwien.cta.processor.CTAProcessorProvider
-tuwien.cta.processor.BuilderProcessorProvider
+tuwien.cta.processor.reference.BuilderProcessorProvider

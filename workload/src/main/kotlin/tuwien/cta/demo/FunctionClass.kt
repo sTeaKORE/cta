@@ -5,7 +5,7 @@ import kotlin.reflect.KFunction
 class FunctionClass {
 
     fun testingFunction(input: TestClass) {
-        println("success")
+        println("testing function called")
     }
 }
 

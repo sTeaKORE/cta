@@ -3,7 +3,7 @@ package tuwien.cta.util
 import com.google.devtools.ksp.symbol.KSAnnotation
 import tuwien.cta.annotation.constraint.*
 import tuwien.cta.exception.InvalidDataTypeException
-import tuwien.cta.input_model.CTAAbstractParameter
+import tuwien.cta.input_model.parameters.CTAAbstractParameter
 import tuwien.cta.input_model.CTAParameterGenerator
 import java.io.OutputStream
 import kotlin.reflect.KClass

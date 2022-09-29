@@ -1,5 +1,10 @@
 package tuwien.cta.input_model
 
+import tuwien.cta.input_model.constraints.CTAIfConstraint
+import tuwien.cta.input_model.parameters.CTAAbstractParameter
+import tuwien.cta.input_model.parameters.CTAEnumParameter
+import tuwien.cta.input_model.parameters.CTAStringEnumParameter
+
 class CTAInputModel(val systemName: String) {
 
     private val parameters: MutableList<CTAAbstractParameter> = mutableListOf()

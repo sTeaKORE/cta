@@ -1,8 +1,9 @@
-package tuwien.cta.input_model
+package tuwien.cta.input_model.parameters
 
-class CTAIntParameter(private val name: String, private val values: List<Int>): CTAAbstractParameter(name) {
+class CTARangeParameter(private val name: String, private val from: Int, private val to: Int): CTAAbstractParameter(name) {
 
     override fun getACTSString(): String {
+        val values = (from..to).toList()
         return "$name(int): ${values.joinToString()}"
     }
 
@@ -11,7 +12,7 @@ class CTAIntParameter(private val name: String, private val values: List<Int>): 
     }
 
     override fun toString(): String {
-        return "Int Parameter $name [${values.joinToString()}]"
+        return "Range Parameter $name [$from - $to]"
     }
 
     companion object {

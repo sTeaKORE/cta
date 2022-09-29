@@ -1,4 +1,4 @@
-package tuwien.cta.input_model
+package tuwien.cta.input_model.parameters
 
 abstract class CTAAbstractParameter(private val name: String) {
 

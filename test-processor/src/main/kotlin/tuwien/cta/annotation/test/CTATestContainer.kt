@@ -4,7 +4,7 @@ import kotlin.reflect.KFunction
 
 interface CTATestContainer {
 
-    abstract var testMethod: KFunction<*>
+    var testMethod: KFunction<*>
 
-    abstract fun oracle(output: String): Boolean
+    fun oracle(output: String): Boolean
 }

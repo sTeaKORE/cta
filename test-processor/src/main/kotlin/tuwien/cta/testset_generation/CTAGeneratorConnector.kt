@@ -1,4 +1,4 @@
-package tuwien.cta.external
+package tuwien.cta.testset_generation
 
 import com.github.doyaaaaaken.kotlincsv.dsl.csvReader
 import tuwien.cta.util.generateOutputFilePath
@@ -49,25 +49,6 @@ class CTAGeneratorConnector() {
         } catch (e: IOException) {
            throw FileNotFoundException("Error while verifying if file is empty, Reason: ${e.localizedMessage}")
         }
-    }
-
-    companion object {
-
-    }
-}
-
-fun main() {
-    val connector = CTAGeneratorConnector()
-    val libraryFile = File("/home/steakor/uni/master/projekt/workload/build/generated/ksp/test/resources/fipo-cli2")
-    val outputFile = connector.generateTestSet(
-        "/home/steakor/uni/master/projekt/workload/build/generated/ksp/test/resources/TestClassACTSConfig.txt",
-        libraryFile
-    )
-    val rows: List<List<String>> = csvReader().readAll(outputFile)
-    println("---------------------------------------------------")
-    rows.forEach {
-        println(it.joinToString())
-        println("---------------------------------------------------")
     }
 }
 

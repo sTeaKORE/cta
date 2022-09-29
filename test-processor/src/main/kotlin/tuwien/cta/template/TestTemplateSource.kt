@@ -1,7 +1,7 @@
 package tuwien.cta.template
 
-import tuwien.cta.input_model.CTAAbstractParameter
-import tuwien.cta.input_model.CTAEnumParameter
+import tuwien.cta.input_model.parameters.CTAAbstractParameter
+import tuwien.cta.input_model.parameters.CTAEnumParameter
 
 class TestTemplateSource(
     val packageName: String,

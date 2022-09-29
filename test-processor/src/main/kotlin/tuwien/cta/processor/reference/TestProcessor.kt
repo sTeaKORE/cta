@@ -1,4 +1,4 @@
-package tuwien.cta.processor
+package tuwien.cta.processor.reference
 
 import com.google.devtools.ksp.processing.*
 import com.google.devtools.ksp.symbol.*

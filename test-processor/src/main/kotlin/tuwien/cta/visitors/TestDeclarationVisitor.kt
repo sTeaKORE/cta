@@ -2,16 +2,12 @@ package tuwien.cta.visitors
 
 import com.github.doyaaaaaken.kotlincsv.dsl.csvReader
 import com.google.devtools.ksp.processing.CodeGenerator
-import com.google.devtools.ksp.processing.Dependencies
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.symbol.*
-import tuwien.cta.external.CTAGeneratorConnector
-import tuwien.cta.template.createTestTemplate
+import tuwien.cta.testset_generation.CTAGeneratorConnector
 import tuwien.cta.input_model.CTAInputModel
-import tuwien.cta.template.createACTSemplate
 import tuwien.cta.util.*
-import java.io.File
-import java.io.FileNotFoundException
+import java.lang.Exception
 
 class TestDeclarationVisitor(
     private val codeGenerator: CodeGenerator,
@@ -21,114 +17,89 @@ class TestDeclarationVisitor(
 
     private val knownAnnotations = listOf("CTATest")
     private val generatorConnector = CTAGeneratorConnector()
+    private val fileUtil = FileUtil(codeGenerator)
 
     override fun visitFunctionDeclaration(function: KSFunctionDeclaration, data: Unit) {
-        if (!visited.contains(function.simpleName.asString())) {
-            visited.add(function.simpleName.asString())
-            loggingUtil.log("----- Visiting Function Declaration - ${function.simpleName.asString()}, Searching for Annotations -----")
-            function.annotations
-                .filter { knownAnnotations.contains(it.shortName.asString()) }
-                .forEach { it.accept(this, data) }
-
-            val parent = function.parentDeclaration as KSClassDeclaration
-            val packageName = parent.containingFile!!.packageName.asString()
-            val className = "${function.simpleName.asString()}Test"
-            val file =
-                codeGenerator.createNewFile(Dependencies(true, function.containingFile!!), packageName, className)
-            val template = createTestTemplate(packageName, className)
-            file.appendText("$template\n")
-            file.close()
+        val functionName = function.simpleName.asString()
+        if (visited.contains(functionName)) {
+            return
         }
+        visited.add(functionName)
+
+        loggingUtil.log("$VISITIOR_NAME.visitFunctionDeclaration($functionName) >>> Searching for ${knownAnnotations.joinToString()} annotations")
+        function.annotations
+            .filter { knownAnnotations.contains(it.shortName.asString()) }
+            .forEach { it.accept(this, data) }
     }
 
     override fun visitAnnotation(annotation: KSAnnotation, data: Unit) {
-        loggingUtil.log("Visiting Annotation - ${annotation.shortName.asString()}")
-        var containerClass = ""
+        loggingUtil.log("$VISITIOR_NAME.visitAnnotation(${annotation.shortName.asString()}) >>> Processing Annotation")
 
-        val container = annotation.arguments.find {
-            val argumentName = it.name
-            argumentName != null && argumentName.asString() == CTA_CONTAINER_ARGUMENT
-        } ?: return
-        val containerType = container.value as KSType
-        val containerDeclaration = containerType.declaration
-        if (containerDeclaration is KSClassDeclaration) {
-            containerClass = containerDeclaration.simpleName.asString()
-        } else {
+        val containerClass = extractContainerClass(annotation) ?: return
+        loggingUtil.log("$VISITIOR_NAME.visitAnnotation(${annotation.shortName.asString()}) >>> Successfully extracted Container Class $containerClass")
+
+
+        val inputModelClasses = extractInputModelClasses(annotation)
+        if (inputModelClasses.isEmpty()) {
+            loggingUtil.log("$VISITIOR_NAME.visitAnnotation(${annotation.shortName.asString()}) >>> No Classes found for Input Model")
             return
         }
 
+        var inputModel = CTAInputModel(inputModelClasses[0].simpleName.asString())
+        for (inputModelClass in inputModelClasses) {
+            loggingUtil.log("$VISITIOR_NAME.visitAnnotation(${annotation.shortName.asString()}) >>> Processing Class Declaration ${inputModelClass.packageName}.${inputModelClass.simpleName.asString()} into Input Model")
+            inputModel = inputModelClass.accept(
+                ConstraintAnnotationVisitor(codeGenerator, resolver, loggingUtil),
+                inputModel
+            )
+        }
 
+        loggingUtil.log("$VISITIOR_NAME.visitAnnotation(${annotation.shortName.asString()}) >>> Final Input Model:\n$inputModel")
+        val pathToACTSFile = fileUtil.generateACTSFile(inputModel)
+        val libraryFile = fileUtil.getLibraryFile()
+        val testSetFile = generatorConnector.generateTestSet(pathToACTSFile, libraryFile)
+        val testSet = csvReader().readAll(testSetFile)
+        inputModel.setTestSet(testSet)
+        val testSetString = inputModel.getTestsetString()
+        loggingUtil.log("$VISITIOR_NAME.visitAnnotation(${annotation.shortName.asString()}) >>> Generated Testset:\n$testSetString")
+        fileUtil.generateTestFile(inputModel, inputModelClasses[0], containerClass)
+    }
+
+    private fun extractContainerClass(annotation: KSAnnotation): String? {
+        val container = annotation.arguments.find {
+            val argumentName = it.name
+            argumentName != null && argumentName.asString() == CTA_CONTAINER_ARGUMENT
+        } ?: return null
+        val containerType = container.value as KSType
+        val containerDeclaration = containerType.declaration
+        return if (containerDeclaration is KSClassDeclaration) {
+            containerDeclaration.simpleName.asString()
+        } else {
+            null
+        }
+    }
+
+    private fun extractInputModelClasses(annotation: KSAnnotation): List<KSClassDeclaration> {
         val inputAnnotations = annotation.arguments.filter {
             val argumentName = it.name
             argumentName != null && argumentName.asString() == CTA_INPUTMODEL_ARGUMENT
         }
-        for (argumentList: KSValueArgument in inputAnnotations) {
-            val argumentList2 = argumentList.value as List<KSType>
-            for (argument in argumentList2) {
-//                loggingUtil.log("Annotation Argument:\n  Name - ${argument.name?.asString()}\n  Value - ${argument.value}")
-                val argumentType = argument
-                val argumentDeclaration = argumentType.declaration
-                loggingUtil.log(
-                    "Found Declaration (class, function, value) in annotation:\n  " +
-                            "Name - ${argumentDeclaration.simpleName.asString()}\n  Package - ${argumentDeclaration.packageName.asString()}"
-                )
-                if (argumentDeclaration is KSClassDeclaration) {
-                    loggingUtil.log("Declaration is Class Annotation => accepting Declaration")
-                    var inputModel = CTAInputModel(argumentDeclaration.simpleName.asString())
-                    inputModel = argumentDeclaration.accept(
-                        ConstraintAnnotationVisitor(codeGenerator, resolver, loggingUtil),
-                        inputModel
-                    )
-                    loggingUtil.log("Received Input Model:\n$inputModel")
-                    val pathToACTSFile = generateACTSFile(inputModel)
-                    val libraryFile = generateLibraryFile()
-                    val testSetFile = generatorConnector.generateTestSet(pathToACTSFile, libraryFile)
-                    val testSet = csvReader().readAll(testSetFile)
-                    inputModel.setTestSet(testSet)
-                    val testSetString = inputModel.getTestsetString()
-                    loggingUtil.log(testSetString)
-                    generateTest(inputModel, argumentDeclaration, containerClass)
-                }
-            }
-        }
-    }
-
-    private fun generateTest(inputModel: CTAInputModel, classToTest: KSClassDeclaration, inputContainer: String) {
-        val fileName = inputModel.getTestFilename()
-        val testFile = codeGenerator.createNewFile(Dependencies(false), classToTest.packageName.asString(), fileName)
-        val testTemplate = createTestTemplate(inputModel, classToTest, fileName, inputContainer)
-        testFile.appendText("$testTemplate\n")
-        testFile.close()
-    }
-
-    private fun generateACTSFile(inputModel: CTAInputModel): String {
-        val filename = inputModel.getFilenameNoExtension()
-        val file = codeGenerator.createNewFile(Dependencies(false), "", filename, "txt")
-
-        val actsTemplate = createACTSemplate(inputModel)
-        file.appendText(actsTemplate)
-        file.close()
-
-        val configFile = codeGenerator.generatedFile.find { it.name == inputModel.getFilenameWithExtension() }
-            ?: throw FileNotFoundException("Generated Config File not found")
-        return configFile.absolutePath
-    }
-
-    private fun generateLibraryFile(): File {
-        val filename = getLibraryName()
-        val existingLibraryFile = codeGenerator.generatedFile.find { it.name == filename }
-        if (existingLibraryFile != null) {
-            return existingLibraryFile
+        if (inputAnnotations.size != 1) {
+            return emptyList()
         }
 
-        codeGenerator.createNewFile(Dependencies(false), "", filename, "").close()
-
-        return codeGenerator.generatedFile.find { it.name == filename }
-            ?: throw FileNotFoundException("Generated Config File not found")
+        return try {
+            val inputModelClassList =
+                inputAnnotations[0].value as List<KSType> //due to vararg translating to list of elements
+            inputModelClassList.map { it.declaration }.filterIsInstance<KSClassDeclaration>()
+        } catch (e: Exception) {
+            emptyList()
+        }
     }
 
     companion object {
         val visited = mutableListOf<String>()
+        const val VISITIOR_NAME = "TestDeclarationVisitor"
         const val CTA_CONTAINER_ARGUMENT = "testContainer"
         const val CTA_INPUTMODEL_ARGUMENT = "classToTest"
     }
