@@ -6,6 +6,7 @@ import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.symbol.*
 import tuwien.cta.testset_generation.CTAGeneratorConnector
 import tuwien.cta.input_model.CTAInputModel
+import tuwien.cta.testset_generation.CTATestset
 import tuwien.cta.util.*
 import java.lang.Exception
 
@@ -45,7 +46,9 @@ class TestDeclarationVisitor(
             return
         }
 
-        var inputModel = CTAInputModel(inputModelClasses[0].simpleName.asString())
+        // use one of the specified classes for testing for name and package
+        val testName = extractClassNameAndPackage(inputModelClasses[0])
+        var inputModel = CTAInputModel(testName)
         for (inputModelClass in inputModelClasses) {
             loggingUtil.log("$VISITIOR_NAME.visitAnnotation(${annotation.shortName.asString()}) >>> Processing Class Declaration ${inputModelClass.packageName}.${inputModelClass.simpleName.asString()} into Input Model")
             inputModel = inputModelClass.accept(
@@ -58,11 +61,11 @@ class TestDeclarationVisitor(
         val pathToACTSFile = fileUtil.generateACTSFile(inputModel)
         val libraryFile = fileUtil.getLibraryFile()
         val testSetFile = generatorConnector.generateTestSet(pathToACTSFile, libraryFile)
-        val testSet = csvReader().readAll(testSetFile)
-        inputModel.setTestSet(testSet)
-        val testSetString = inputModel.getTestsetString()
-        loggingUtil.log("$VISITIOR_NAME.visitAnnotation(${annotation.shortName.asString()}) >>> Generated Testset:\n$testSetString")
-        fileUtil.generateTestFile(inputModel, inputModelClasses[0], containerClass)
+
+        val testSetEntries = csvReader().readAll(testSetFile)
+        val testSet = CTATestset(inputModel.getParameters(), testSetEntries)
+        loggingUtil.log("$VISITIOR_NAME.visitAnnotation(${annotation.shortName.asString()}) >>> Generated Testset:\n$testSet")
+        fileUtil.generateTestFile(testSet, testName, containerClass, inputModelClasses)
     }
 
     private fun extractContainerClass(annotation: KSAnnotation): String? {
@@ -95,6 +98,12 @@ class TestDeclarationVisitor(
         } catch (e: Exception) {
             emptyList()
         }
+    }
+
+    private fun extractClassNameAndPackage(classDeclaration: KSClassDeclaration): CTAFileName {
+        val className = classDeclaration.simpleName.asString()
+        val packageName = classDeclaration.packageName.asString()
+        return CTAFileName(className, packageName)
     }
 
     companion object {

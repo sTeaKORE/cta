@@ -2,14 +2,13 @@ package tuwien.cta.input_model
 
 import tuwien.cta.input_model.constraints.CTAIfConstraint
 import tuwien.cta.input_model.parameters.CTAAbstractParameter
-import tuwien.cta.input_model.parameters.CTAEnumParameter
-import tuwien.cta.input_model.parameters.CTAStringEnumParameter
+import tuwien.cta.util.CTAFileName
 
-class CTAInputModel(val systemName: String) {
+class CTAInputModel(val fileName: CTAFileName) {
 
     private val parameters: MutableList<CTAAbstractParameter> = mutableListOf()
     private val constraints: MutableList<CTAIfConstraint> = mutableListOf()
-    private var testSet: List<List<String>> = emptyList()
+
 
     private var parameterType: String = ""
     private var name: String = ""
@@ -26,13 +25,6 @@ class CTAInputModel(val systemName: String) {
         constraints.add(constraint)
     }
 
-    fun setTestSet(testSet: List<List<String>>) {
-        this.testSet = testSet
-    }
-
-    fun getTestSet(): List<List<String>> {
-        return testSet
-    }
 
     fun getConstraints(): String {
         //TODO: this should return the constraint block in acts syntax
@@ -59,40 +51,6 @@ class CTAInputModel(val systemName: String) {
             parameterBuilder.append("\n")
         }
         return parameterBuilder.toString()
-    }
-
-    fun getTestsetString(): String {
-        val stringBuilder = StringBuilder()
-        stringBuilder.append("TestSet:\n\n")
-        testSet.forEach { testSetEntry ->
-            testSetEntry.forEachIndexed { index, testSetValue ->
-                val parameter = parameters[index]
-                stringBuilder.append("${parameter.getParameterName()} = $testSetValue  ")
-            }
-            stringBuilder.append("\n")
-        }
-        return stringBuilder.toString()
-    }
-
-    fun getTestSetArguments(): List<String> {
-        val testSetArguments = mutableListOf<String>()
-        val stringBuilder = StringBuilder()
-        testSet.forEach { testSetEntry ->
-            testSetEntry.forEachIndexed { index, testSetValue ->
-                val parameter = parameters[index]
-                if(parameter is CTAEnumParameter) {
-                    stringBuilder.append("${parameter.getEnumPrefix()}$testSetValue, ")
-                } else if (parameter is CTAStringEnumParameter) {
-                    stringBuilder.append("\"$testSetValue\", ")
-                } else {
-                    stringBuilder.append("$testSetValue, ")
-                }
-            }
-            stringBuilder.setLength(stringBuilder.length - 2)
-            testSetArguments.add(stringBuilder.toString())
-            stringBuilder.clear()
-        }
-        return testSetArguments
     }
 
     override fun toString(): String {

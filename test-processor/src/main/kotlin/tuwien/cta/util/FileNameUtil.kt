@@ -10,6 +10,27 @@ const val CSV_ENDING = "csv"
 
 private const val CT_LIBRARY = "fipo-cli"
 
+class CTAFileName(
+    private val name: String,
+    private val packageName: String,
+) {
+    fun getConfigFileNameNoExtension(): String {
+        return "$name$CONFIG_FILE_SUFFIX"
+    }
+
+    fun getConfigFileNameWithExtension(): String {
+        return "$name$CONFIG_FILE_SUFFIX.$TXT_ENDING"
+    }
+
+    fun getTestFileName(): String {
+        return "$name$TEST_FILE_SUFFIX"
+    }
+
+    fun getPackage(): String {
+        return packageName
+    }
+}
+
 fun String.generateOutputFilePath(): String = this.reversed().replaceFirst(
     CONFIG_FILE_SUFFIX.reversed(),
     OUTPUT_FILE_SUFFIX.reversed()
@@ -17,10 +38,5 @@ fun String.generateOutputFilePath(): String = this.reversed().replaceFirst(
     TXT_ENDING.reversed(),
     CSV_ENDING.reversed()
 ).reversed()
-
-fun CTAInputModel.getFilenameNoExtension() = "${this.systemName}${CONFIG_FILE_SUFFIX}"
-fun CTAInputModel.getFilenameWithExtension() = "${this.systemName}${CONFIG_FILE_SUFFIX}.$TXT_ENDING"
-
-fun CTAInputModel.getTestFilename() = "${this.systemName}${TEST_FILE_SUFFIX}"
 
 fun getLibraryName(): String = CT_LIBRARY

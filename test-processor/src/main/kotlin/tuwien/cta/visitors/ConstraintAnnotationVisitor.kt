@@ -16,27 +16,21 @@ class ConstraintAnnotationVisitor(
     private val loggingUtil: LoggingUtil
 ): KSVisitor<CTAInputModel, CTAInputModel> {
 
-
-
-    private fun log(message: String) {
-        loggingUtil.log("  -- $message")
-    }
-
     override fun visitClassDeclaration(classDeclaration: KSClassDeclaration, data: CTAInputModel): CTAInputModel {
-        log("Visiting Class Declaration - ${classDeclaration.simpleName.asString()}, Searching for Annotations on all levels")
+        loggingUtil.log("$VISITIOR_NAME.visitClassDeclaration(${classDeclaration.simpleName.asString()}) >>> Scanning Class for annotations")
         classDeclaration.annotations.forEach{ it.accept(this, data) }
         classDeclaration.declarations.forEach { it.accept(this, data) }
         return data
     }
 
     override fun visitFunctionDeclaration(function: KSFunctionDeclaration, data: CTAInputModel): CTAInputModel {
-        log("Visiting Function Declaration - ${function.simpleName.asString()}, Searching for Annotations")
+        loggingUtil.log("$VISITIOR_NAME.visitFunctionDeclaration(${function.simpleName.asString()}) >>> Scanning Function for annotations")
         function.annotations.forEach { it.accept(this, data) }
         return data
     }
 
     override fun visitPropertyDeclaration(property: KSPropertyDeclaration, data: CTAInputModel): CTAInputModel {
-        log("Visiting Property Declaration - ${property.simpleName.asString()}, Searching for Annotations")
+        loggingUtil.log("$VISITIOR_NAME.visitPropertyDeclaration(${property.simpleName.asString()}) >>> Scanning Property for annotations")
         val typeDeclaration = property.type.resolve().declaration
         val propertyType = typeDeclaration.accept(ResolveTypeVisitor(), Unit)
         data.setPayload(propertyType, property.simpleName.asString())
@@ -46,26 +40,26 @@ class ConstraintAnnotationVisitor(
 
     override fun visitAnnotation(annotation: KSAnnotation, data: CTAInputModel): CTAInputModel {
         val (typePayload, namePayload) = data.getPayload()
-        log("Visiting Annotation - ${annotation.shortName.asString()} - with Type - $typePayload")
+//        log("Visiting Annotation - ${annotation.shortName.asString()} - with Type - $typePayload")
         val type: CTAType
         try {
             type = CTAType.valueOf(typePayload)
         } catch (e: Exception) {
-            log("Unsupported Data Type: $typePayload, Skipping Annotation")
+//            log("Unsupported Data Type: $typePayload, Skipping Annotation")
             return data
         }
         val validated = annotation.validateAnnotatedType(type)
         return if (validated) {
             val propertyConstraint = annotation.generateParameter(type, namePayload)
 
-            log("Adding Property Constraint: $propertyConstraint")
+//            log("Adding Property Constraint: $propertyConstraint")
             data.addParameter(propertyConstraint)
             annotation.arguments.forEach {
-                log("Annotation Argument: ${it.name?.asString()} - ${it.value?.toString()}")
+//                log("Annotation Argument: ${it.name?.asString()} - ${it.value?.toString()}")
             }
             data
         } else {
-            log("Invalid Annotation Data Type: ${annotation.shortName.asString()} - $typePayload, Skipping Annotation")
+//            log("Invalid Annotation Data Type: ${annotation.shortName.asString()} - $typePayload, Skipping Annotation")
             data
         }
     }
@@ -168,5 +162,9 @@ class ConstraintAnnotationVisitor(
     override fun visitValueParameter(valueParameter: KSValueParameter, data: CTAInputModel): CTAInputModel {
         //not needed
         return data
+    }
+
+    companion object {
+        const val VISITIOR_NAME = "ConstraintAnnotationVisitor"
     }
 }

@@ -1,34 +1,28 @@
 package tuwien.cta.template
 
-import tuwien.cta.input_model.parameters.CTAAbstractParameter
-import tuwien.cta.input_model.parameters.CTAEnumParameter
+import tuwien.cta.testset_generation.CTATestset
+import tuwien.cta.util.CTAFileName
 
 class TestTemplateSource(
-    val packageName: String,
-    val testClassName: String,
-    val classToTest: String,
-    val testCasesList: List<String>,
+    val testSet: CTATestset,
+    val imports: TestTemplateImports,
+    val className: CTAFileName,
     val containerClass: String,
-    private val parameters: List<CTAAbstractParameter>
+    val classesToTest: List<String>
 ) {
-    fun getImport(): List<String> {
-        val imports = mutableListOf<String>()
-        imports.add("$packageName.$classToTest")
-        parameters.filterIsInstance<CTAEnumParameter>().forEach { imports.add(it.getImport()) }
-        return imports
-    }
 
     fun getParameterString(): String {
-        return parameters.joinToString() { it.getVariableString() }
+        return testSet.parameters.joinToString() { it.getVariableString() }
     }
 
-    fun getInitializingFunction(): String {
+    fun getInitializingFunction(spacing: String): String {
         val stringBuilder = StringBuilder()
-        stringBuilder.append("val input = $classToTest()\n")
-        parameters.forEach {
-            stringBuilder.append("input.${it.getParameterName()} = ${it.getParameterName()}\n")
+        val classToTest = classesToTest[0]
+        stringBuilder.append("${spacing}val input = $classToTest()\n")
+        testSet.parameters.forEach {
+            stringBuilder.append("${spacing}input.${it.getParameterName()} = ${it.getParameterName()}\n")
         }
-        stringBuilder.append("return input")
+        stringBuilder.append("${spacing}return input")
         return stringBuilder.toString()
     }
 }
