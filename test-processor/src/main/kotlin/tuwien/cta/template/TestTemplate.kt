@@ -45,8 +45,8 @@ private fun parseTemplate(templateSource: TestTemplateSource): String {
     stringBuilder.append(") {\n")
     stringBuilder.append("${double_spacer}println(\"Executing automatically generated ct test\")\n")
     stringBuilder.append("${double_spacer}val testContainer = ${templateSource.containerClass}()\n")
-    stringBuilder.append("${double_spacer}testContainer.testMethod.call(${getInputs(templateSource.classesToTest, false)})\n")
-    stringBuilder.append("${double_spacer}testContainer.oracle(\"todo\")\n")
+    stringBuilder.append("${double_spacer}val inputArray = arrayOf(${getInputs(templateSource.classesToTest, false)}) as Array<Any>\n")
+    stringBuilder.append("${double_spacer}testContainer.oracle(testContainer.testMethod, inputArray)\n")
     stringBuilder.append("${spacer}}\n")
     stringBuilder.append("\n")
 

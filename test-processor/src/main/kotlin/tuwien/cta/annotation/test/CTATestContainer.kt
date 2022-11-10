@@ -6,5 +6,5 @@ interface CTATestContainer {
 
     var testMethod: KFunction<*>
 
-    fun oracle(output: String): Boolean
+    fun oracle(methodToTest: KFunction<*>, inputs: Array<Any>): Boolean
 }
