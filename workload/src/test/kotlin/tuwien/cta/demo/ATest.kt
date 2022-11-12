@@ -24,6 +24,7 @@ class CTATestContainerImpl: CTATestContainer {
     override var testMethod: KFunction<*> = FunctionClass()::testingFunction
 
     override fun oracle(methodToTest: KFunction<*>, inputs: Array<Any>): Boolean {
+        println("got called with inputs: ${inputs.joinToString()}")
         //setup
         println("setup before method call")
 

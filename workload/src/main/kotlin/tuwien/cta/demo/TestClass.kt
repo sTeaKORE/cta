@@ -1,8 +1,6 @@
 package tuwien.cta.demo
 
-import tuwien.cta.annotation.constraint.CTAInt
-import tuwien.cta.annotation.constraint.CTABoolean
-import tuwien.cta.annotation.constraint.CTAEnum
+import tuwien.cta.annotation.constraint.*
 
 // check latter how to tackle in class enums
 enum class Example {
@@ -10,6 +8,9 @@ enum class Example {
     Example2
 }
 
+@CTAConstraints([
+    CTAIfConstraint("numberWithRange = 3 => stringEnum = \"YELLOW\""),
+])
 class TestClass {
 
     @CTAInt(from = 0, to = 10)
@@ -30,4 +31,5 @@ class TestClass {
     override fun toString(): String {
         return "numberWithRange: $numberWithRange, numberWithArrayOfValues: $numberWithArrayOfValues, boolean: $boolean, enum: $enum, stringEnum: $stringEnum"
     }
+
 }
