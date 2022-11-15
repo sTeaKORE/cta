@@ -15,11 +15,10 @@ class CTAGeneratorConnector() {
         val (command, outputPath) = generateCommand(configPath, library)
 
         val response = command.runCommand()
-        println(response)
 
         val outputFile = File(outputPath)
         if (isFileEmpty(outputFile)) {
-            throw FileNotFoundException("Empty Response File after executing CT library")
+            throw FileNotFoundException("Generated Testset at location: ${outputFile.absolutePath} not found or empty, Reason: $response")
         } else {
             return outputFile
         }
@@ -43,11 +42,11 @@ class CTAGeneratorConnector() {
     }
 
     private fun isFileEmpty(file: File): Boolean {
-        try {
+        return try {
             val br = BufferedReader(FileReader(file))
-            return br.readLine() == null
+            br.readLine() == null
         } catch (e: IOException) {
-           throw FileNotFoundException("Error while verifying if file is empty, Reason: ${e.localizedMessage}")
+            true
         }
     }
 }
@@ -61,7 +60,7 @@ fun String.runCommand(): String {
             .start()
 
         proc.waitFor(60, TimeUnit.MINUTES)
-        proc.inputStream.bufferedReader().readText()
+        "${proc.inputStream.bufferedReader().readText()}${proc.errorStream.bufferedReader().readText()}"
     } catch(e: IOException) {
         e.localizedMessage
     }

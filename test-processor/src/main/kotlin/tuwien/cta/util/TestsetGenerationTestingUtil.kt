@@ -4,16 +4,16 @@ import com.github.doyaaaaaken.kotlincsv.dsl.csvReader
 import tuwien.cta.testset_generation.CTAGeneratorConnector
 import java.io.File
 
-const val INPUT_FILE_LOCATION = "<insert input file for generation>"
-const val OUTPUT_FILE_LOCATION = "<insert desired destination for output file>"
+const val LIBRARY_FILE_LOCATION = "<add library location>"
+const val CONFIG_FILE_LOCATION = "<add config location>"
 
 //used for debugging testset generation tool, without triggering complete process
 fun main() {
     val connector = CTAGeneratorConnector()
 
-    val libraryFile = File(INPUT_FILE_LOCATION)
+    val libraryFile = File(LIBRARY_FILE_LOCATION)
     val outputFile = connector.generateTestSet(
-        OUTPUT_FILE_LOCATION,
+        CONFIG_FILE_LOCATION,
         libraryFile
     )
 
