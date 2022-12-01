@@ -8,15 +8,20 @@ enum class Example {
     Example2
 }
 
-@CTAConstraints([
-    CTAIfConstraint("numberWithRange = 3 => stringEnum = \"YELLOW\""),
-])
+@CTAConstraints(
+    CTAIfConstraint("test"),
+    CTAIfConstraint("test"),
+    CTAIfConstraint("test"),
+    CTAIfConstraint("test"),
+    CTAIfConstraint("test"),
+    CTAIfConstraint("test"),
+)
 class TestClass {
 
     @CTAInt(from = 0, to = 10)
     var numberWithRange: Int = 1
 
-    @CTAInt(values = [0,1,2,3,4,5])
+    @CTAInt(values = [0, 1, 2, 3, 4, 5])
     var numberWithArrayOfValues: Int = 3
 
     @CTABoolean
