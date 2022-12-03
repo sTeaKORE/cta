@@ -4,17 +4,13 @@ import tuwien.cta.annotation.constraint.*
 
 // check latter how to tackle in class enums
 enum class Example {
-    Example1,
-    Example2
+    Example1, Example2
 }
 
 @CTAConstraints(
-    CTAIfConstraint("test"),
-    CTAIfConstraint("test"),
-    CTAIfConstraint("test"),
-    CTAIfConstraint("test"),
-    CTAIfConstraint("test"),
-    CTAIfConstraint("test"),
+    CTAIfConstraint("enum $CTEQUALS \"Example1\" $CTIMPLIES stringEnum $CTNOTEQUALS \"RED\""),
+    CTAIfConstraint("numberWithRange $CTEQUALS 2 $CTIMPLIES numberWithArrayOfValues $CTEQUALS 4"),
+    CTAIfConstraint("numberWithRange $CTEQUALS 6 $CTIMPLIES (enum $CTEQUALS \"Example2\" $CTAND (stringEnum $CTEQUALS \"GREEN\" $CTOR stringEnum $CTEQUALS \"YELLOW\"))")
 )
 class TestClass {
 

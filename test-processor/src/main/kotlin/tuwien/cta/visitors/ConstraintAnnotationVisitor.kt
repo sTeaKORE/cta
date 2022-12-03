@@ -8,6 +8,7 @@ import tuwien.cta.annotation.constraint.CTAType
 import tuwien.cta.util.LoggingUtil
 import tuwien.cta.util.validateAnnotatedType
 import tuwien.cta.input_model.CTAInputModel
+import tuwien.cta.input_model.constraints.CTAConstraint
 import tuwien.cta.util.generateParameter
 
 class ConstraintAnnotationVisitor(
@@ -39,29 +40,55 @@ class ConstraintAnnotationVisitor(
     }
 
     override fun visitAnnotation(annotation: KSAnnotation, data: CTAInputModel): CTAInputModel {
+        loggingUtil.log("$VISITIOR_NAME.visitAnnotation(${annotation.shortName.asString()}) >>> Check annotation")
+        return if (annotation.shortName.asString() == CONSTRAINTS_ANNOTATION_NAME) {
+            parseConstraints(annotation, data)
+        } else if(KNOWN_PROPERTY_ANNOTATIONS.contains(annotation.shortName.asString())) {
+            parseValueConstraint(annotation, data)
+        } else {
+            data
+        }
+    }
+
+    private fun parseValueConstraint(annotation: KSAnnotation, data: CTAInputModel): CTAInputModel {
         val (typePayload, namePayload) = data.getPayload()
-//        log("Visiting Annotation - ${annotation.shortName.asString()} - with Type - $typePayload")
+        loggingUtil.log("$VISITIOR_NAME.parseValueConstraint(${annotation.shortName.asString()}) >>> Parsing Property Constraint")
         val type: CTAType
         try {
             type = CTAType.valueOf(typePayload)
         } catch (e: Exception) {
-//            log("Unsupported Data Type: $typePayload, Skipping Annotation")
+            loggingUtil.log("$VISITIOR_NAME.parseValueConstraint(${annotation.shortName.asString()}) >>> Unsupported Data Type: $typePayload, Skipping Constraint")
             return data
         }
         val validated = annotation.validateAnnotatedType(type)
         return if (validated) {
             val propertyConstraint = annotation.generateParameter(type, namePayload)
 
-//            log("Adding Property Constraint: $propertyConstraint")
+            loggingUtil.log("$VISITIOR_NAME.parseValueConstraint(${annotation.shortName.asString()}) >>> Adding Property Constraint: $propertyConstraint")
             data.addParameter(propertyConstraint)
-            annotation.arguments.forEach {
-//                log("Annotation Argument: ${it.name?.asString()} - ${it.value?.toString()}")
-            }
             data
         } else {
-//            log("Invalid Annotation Data Type: ${annotation.shortName.asString()} - $typePayload, Skipping Annotation")
+            loggingUtil.log("$VISITIOR_NAME.parseValueConstraint(${annotation.shortName.asString()}) >>> Invalid Annotation Data Type: ${annotation.shortName.asString()} - $typePayload, Skipping Constraint")
             data
         }
+    }
+
+    private fun parseConstraints(annotation: KSAnnotation, data: CTAInputModel): CTAInputModel {
+        loggingUtil.log("$VISITIOR_NAME.parseConstraints(${annotation.shortName.asString()}) >>> Parsing Constraint")
+        val ifConstraint = annotation.arguments.find { it.name?.asString() == IF_CONSTRAINTS }
+        if (ifConstraint != null) {
+            val valuesList = (ifConstraint.value as List<*>).filterIsInstance<KSAnnotation>()
+            valuesList.forEach { IfConstraint ->
+                loggingUtil.log("$VISITIOR_NAME.parseConstraints(${annotation.shortName.asString()}) >>> Parsing If Constraint")
+                val constraint = IfConstraint.arguments.find { it.name?.asString() == IF_CONSTRAINTS_VALUE }
+                if (constraint != null) {
+                    val value = constraint.value as String
+                    loggingUtil.log("$VISITIOR_NAME.parseConstraints(${annotation.shortName.asString()}) >>> Adding Constraint $value")
+                    data.addConstraint(CTAConstraint(value))
+                }
+            }
+        }
+        return data
     }
 
     override fun visitAnnotated(annotated: KSAnnotated, data: CTAInputModel): CTAInputModel {
@@ -166,5 +193,9 @@ class ConstraintAnnotationVisitor(
 
     companion object {
         const val VISITIOR_NAME = "ConstraintAnnotationVisitor"
+        const val CONSTRAINTS_ANNOTATION_NAME = "CTAConstraints"
+        const val IF_CONSTRAINTS = "ifConstraints"
+        const val IF_CONSTRAINTS_VALUE = "constraint"
+        val KNOWN_PROPERTY_ANNOTATIONS = listOf("CTABoolean", "CTAEnum", "CTAInt")
     }
 }

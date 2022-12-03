@@ -1,13 +1,13 @@
 package tuwien.cta.input_model
 
-import tuwien.cta.input_model.constraints.CTAIfConstraint
+import tuwien.cta.input_model.constraints.CTAConstraint
 import tuwien.cta.input_model.parameters.CTAAbstractParameter
 import tuwien.cta.util.CTAFileName
 
 class CTAInputModel(val fileName: CTAFileName) {
 
     private val parameters: MutableList<CTAAbstractParameter> = mutableListOf()
-    private val constraints: MutableList<CTAIfConstraint> = mutableListOf()
+    private val constraints: MutableList<CTAConstraint> = mutableListOf()
 
 
     private var parameterType: String = ""
@@ -21,14 +21,8 @@ class CTAInputModel(val fileName: CTAFileName) {
         return parameters
     }
 
-    fun addConstraint(constraint: CTAIfConstraint) {
+    fun addConstraint(constraint: CTAConstraint) {
         constraints.add(constraint)
-    }
-
-
-    fun getConstraints(): String {
-        //TODO: this should return the constraint block in acts syntax
-        return "Todo"
     }
 
     fun setPayload(parameterType: String, name: String) {
@@ -51,6 +45,15 @@ class CTAInputModel(val fileName: CTAFileName) {
             parameterBuilder.append("\n")
         }
         return parameterBuilder.toString()
+    }
+
+    fun getConstraintsString(): String {
+        val constraintBuilder = StringBuilder()
+        for (constraint in constraints) {
+            constraintBuilder.append(constraint.value)
+            constraintBuilder.append("\n")
+        }
+        return constraintBuilder.toString()
     }
 
     override fun toString(): String {
