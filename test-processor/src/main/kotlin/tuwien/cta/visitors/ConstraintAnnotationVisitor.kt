@@ -5,6 +5,8 @@ import com.google.devtools.ksp.processing.CodeGenerator
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.symbol.*
 import tuwien.cta.annotation.constraint.CTAType
+import tuwien.cta.annotation.constraint.CTNOTSUPPORTED
+import tuwien.cta.exception.InvalidOperatorException
 import tuwien.cta.util.LoggingUtil
 import tuwien.cta.util.validateAnnotatedType
 import tuwien.cta.input_model.CTAInputModel
@@ -78,17 +80,26 @@ class ConstraintAnnotationVisitor(
         val ifConstraint = annotation.arguments.find { it.name?.asString() == IF_CONSTRAINTS }
         if (ifConstraint != null) {
             val valuesList = (ifConstraint.value as List<*>).filterIsInstance<KSAnnotation>()
-            valuesList.forEach { IfConstraint ->
+            valuesList.forEach { ifConstraint ->
                 loggingUtil.log("$VISITIOR_NAME.parseConstraints(${annotation.shortName.asString()}) >>> Parsing If Constraint")
-                val constraint = IfConstraint.arguments.find { it.name?.asString() == IF_CONSTRAINTS_VALUE }
+                val constraint = ifConstraint.arguments.find { it.name?.asString() == IF_CONSTRAINTS_VALUE }
                 if (constraint != null) {
                     val value = constraint.value as String
                     loggingUtil.log("$VISITIOR_NAME.parseConstraints(${annotation.shortName.asString()}) >>> Adding Constraint $value")
+                    checkForUnsupportedOperations(value)
                     data.addConstraint(CTAConstraint(value))
                 }
             }
         }
         return data
+    }
+
+    private fun checkForUnsupportedOperations(ifConstraint: String) {
+        val constraintSplit = ifConstraint.split(" ")
+        val unsupportedOperations = constraintSplit.filter { CTNOTSUPPORTED.contains(it) }.firstOrNull()
+        if (unsupportedOperations != null) {
+            throw InvalidOperatorException(unsupportedOperations)
+        }
     }
 
     override fun visitAnnotated(annotated: KSAnnotated, data: CTAInputModel): CTAInputModel {

@@ -1,5 +1,9 @@
 package tuwien.cta.input_model.parameters
 
+/**
+ * Boolean Value Constraint Parameter Class.
+ * Implements CTAAbstractParameter and all its parameters.
+ */
 class CTABooleanParameter(private val name: String): CTAAbstractParameter(name) {
 
     override fun getACTSString(): String {
