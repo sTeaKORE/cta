@@ -7,7 +7,10 @@ import java.io.File
 const val LIBRARY_FILE_LOCATION = "<add library location>"
 const val CONFIG_FILE_LOCATION = "<add config location>"
 
-//used for debugging testset generation tool, without triggering complete process
+/**
+ * Used for debugging test set generation tool, without triggering complete process.
+ *
+ */
 fun main() {
     val connector = CTAGeneratorConnector()
 

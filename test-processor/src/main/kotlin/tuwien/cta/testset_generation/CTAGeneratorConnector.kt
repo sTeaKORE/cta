@@ -9,8 +9,21 @@ import java.io.FileReader
 import java.io.IOException
 import java.util.concurrent.TimeUnit
 
+/**
+ * connector to combinatorial testing library
+ *
+ * @constructor Create empty connector
+ */
 class CTAGeneratorConnector() {
 
+    /**
+     * connects to the library to generate a test set from given input model config
+     *
+     * @param configPath path to config in ACTS format
+     * @param library library used for generating.
+     * @return file containing the output of the library (test set)
+     * @throws FileNotFoundException if something went wrong during generation (e.g. a constraint was falsely defined)
+     */
     fun generateTestSet(configPath: String, library: File): File {
         val (command, outputPath) = generateCommand(configPath, library)
 
@@ -24,6 +37,13 @@ class CTAGeneratorConnector() {
         }
     }
 
+    /**
+     * helper function to generate command line command to execute library
+     *
+     * @param configPath path to ACTS config
+     * @param library library used for generating.
+     * @return Pair containing the command and the output directory after generation
+     */
     private fun generateCommand(configPath: String, library: File): Pair<String, String> {
         if (isFileEmpty(library)) {
             val binaryInputStream = this::class.java.classLoader.getResourceAsStream("fipo-cli")
@@ -41,6 +61,12 @@ class CTAGeneratorConnector() {
         return Pair(command, outputPath)
     }
 
+    /**
+     * helper function checking if file is empty
+     *
+     * @param file file to be checked
+     * @return true if file empty, otherwise false
+     */
     private fun isFileEmpty(file: File): Boolean {
         return try {
             val br = BufferedReader(FileReader(file))
@@ -51,6 +77,11 @@ class CTAGeneratorConnector() {
     }
 }
 
+/**
+ * extension function used to run a command line command which it extends.
+ *
+ * @return output of library.
+ */
 fun String.runCommand(): String {
     return try {
         val parts = this.split("\\s".toRegex())

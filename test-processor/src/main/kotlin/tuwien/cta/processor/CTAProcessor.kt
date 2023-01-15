@@ -10,17 +10,24 @@ import tuwien.cta.visitors.TestDeclarationVisitor
 import java.io.OutputStream
 
 /**
- * Current plan for process:
- * 1) collect constraints
- * 2) call external program to convert constraints to testcases
- * 3) translate test cases to usable test cases
- * 4) hook up testcases with generated automatic test
- * 5) done
+ * Combinatorial testing annotation processor. First entry point of the whole process. Searches for annotations and
+ * starts relevant processes.
+ *
+ * @property codeGenerator Generator which is used to generate the automated test suite.
+ * @constructor Create empty Combinatorial testing annotation processor
  */
 class CTAProcessor(
     private val codeGenerator: CodeGenerator
 ) : SymbolProcessor {
 
+    /**
+     * Starts the processing of the code base. This function searches for the debug annotation and creates a log file if
+     * present as well as searches for all CTATest annotations and starts first process of reading annotation by passing
+     * each annotation to a visitor.
+     *
+     * @param resolver class from ksp which can be used to search for annotations
+     * @return list of invalid annotations which could be used in further processors
+     */
     override fun process(resolver: Resolver): List<KSAnnotated> {
         //check if debug mode is enabled
         val isDebug = resolver.getSymbolsWithAnnotation("tuwien.cta.annotation.utility.CTADebug").count() > 0
@@ -43,6 +50,13 @@ class CTAProcessor(
         return symbols.filter { !it.validate() }.toList()
     }
 
+    /**
+     * Creates a logging util, which is a wrapper around a logging file. If the debug annotation is present it generates
+     * a logging file with the code generator.
+     *
+     * @param isDebug boolean representing if debug annotation was present
+     * @return new LoggingUtil
+     */
     private fun createLoggingUtil(isDebug: Boolean): LoggingUtil {
         val logFileName = "LogFile$counter"
         counter += 1
@@ -65,6 +79,12 @@ class CTAProcessor(
     }
 }
 
+/**
+ * Provider Class which creates our processor. This class is referenced by the ksp library so ksp knows which processors
+ * exist and have to be executed.
+ *
+ * @constructor Create empty provider.
+ */
 class CTAProcessorProvider : SymbolProcessorProvider {
     override fun create(
         environment: SymbolProcessorEnvironment

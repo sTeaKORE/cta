@@ -10,6 +10,18 @@ import tuwien.cta.testset_generation.CTATestset
 import tuwien.cta.util.*
 import java.lang.Exception
 
+/**
+ * Entry Point Visitor which orchestrates the whole process. Current process revolves around following steps:
+ * 1) Search for testing annotation (CTATest) and parse all its parameters.
+ * 2) Use the constraint parsing annotation visitor to generate an input model.
+ * 3) Use the library to generate a test set.
+ * 4) Use all above gathered information to generate the automated test.
+ *
+ * @property codeGenerator code generator from ksp
+ * @property resolver resolver from ksp
+ * @property loggingUtil logging util
+ * @constructor Create empty Test declaration visitor
+ */
 class TestDeclarationVisitor(
     private val codeGenerator: CodeGenerator,
     private val resolver: Resolver,
@@ -20,6 +32,13 @@ class TestDeclarationVisitor(
     private val generatorConnector = CTAGeneratorConnector()
     private val fileUtil = FileUtil(codeGenerator)
 
+    /**
+     * visitor function for functions, searches for test annotations on function and passes them to the annotation
+     * visitor function
+     *
+     * @param function function from ksp
+     * @param data optional data which can be passed between visitors
+     */
     override fun visitFunctionDeclaration(function: KSFunctionDeclaration, data: Unit) {
         val functionName = function.simpleName.asString()
         if (visited.contains(functionName)) {
@@ -33,6 +52,15 @@ class TestDeclarationVisitor(
             .forEach { it.accept(this, data) }
     }
 
+    /**
+     * visitor function for annotation
+     * parses the test annotation and then passes the referenced class to the visitor which parses all constraint annotations,
+     * afterwards uses the input model for test set generation and ultimately starts the file generation,
+     * most of the above process is done in other places ,but they are all triggered from this method
+     *
+     * @param annotation annotation from ksp
+     * @param data optional data which can be passed between visitors
+     */
     override fun visitAnnotation(annotation: KSAnnotation, data: Unit) {
         loggingUtil.log("$VISITIOR_NAME.visitAnnotation(${annotation.shortName.asString()}) >>> Processing Annotation")
 
@@ -68,6 +96,12 @@ class TestDeclarationVisitor(
         fileUtil.generateTestFile(testSet, testName, containerClass, inputModelClasses)
     }
 
+    /**
+     * helper function parse container class from annotation parameter
+     *
+     * @param annotation annotation from ksp
+     * @return container class or null if not found
+     */
     private fun extractContainerClass(annotation: KSAnnotation): String? {
         val container = annotation.arguments.find {
             val argumentName = it.name
@@ -82,6 +116,13 @@ class TestDeclarationVisitor(
         }
     }
 
+    /**
+     * helper function to parse input model classes from annotation parameters
+     *
+     * @param annotation annotation from ksp
+     * @return list of ksp class declarations which should be used as input model, returns an empty list if an error
+     * occurred during parsing
+     */
     private fun extractInputModelClasses(annotation: KSAnnotation): List<KSClassDeclaration> {
         val inputAnnotations = annotation.arguments.filter {
             val argumentName = it.name
@@ -100,6 +141,12 @@ class TestDeclarationVisitor(
         }
     }
 
+    /**
+     * helper function to extract class name and package of given class
+     *
+     * @param classDeclaration ksp class declaration
+     * @return name and package wrapped in the CTAFileName class
+     */
     private fun extractClassNameAndPackage(classDeclaration: KSClassDeclaration): CTAFileName {
         val className = classDeclaration.simpleName.asString()
         val packageName = classDeclaration.packageName.asString()

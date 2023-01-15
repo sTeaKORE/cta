@@ -4,6 +4,16 @@ import com.google.devtools.ksp.symbol.KSClassDeclaration
 import tuwien.cta.testset_generation.CTATestset
 import tuwien.cta.util.CTAFileName
 
+/**
+ * helper function to create a complete junit 5 test file string, processes all information, parses it and returns the
+ * string
+ *
+ * @param testSet generated test set from the combinatorial testing library
+ * @param testName name of the test class
+ * @param containerClass container class of the test (from annotation)
+ * @param classesToTest classes used as input for testing (from annotation)
+ * @return junit 5 test file string
+ */
 fun createTestTemplate(
     testSet: CTATestset,
     testName: CTAFileName,
@@ -20,6 +30,13 @@ fun createTestTemplate(
 const val spacer = "    "
 const val double_spacer = "$spacer$spacer"
 const val triple_spacer = "$spacer$spacer$spacer"
+
+/**
+ * takes the source and uses it to fill in the template and returns the filled in template.
+ *
+ * @param templateSource source containing all relevant information for the template
+ * @return parsed template string
+ */
 private fun parseTemplate(templateSource: TestTemplateSource): String {
     val stringBuilder = StringBuilder()
 
@@ -72,6 +89,14 @@ private fun parseTemplate(templateSource: TestTemplateSource): String {
     return stringBuilder.toString()
 }
 
+/**
+ * helper function which returns all parameters of input class, used to fill in parameters in helper functions inside
+ * the test file
+ *
+ * @param classes all class (parameters) as list
+ * @param withType boolean to describe if we only need the name or also the type
+ * @return string concatenating all parameters with or without type.
+ */
 private fun getInputs(classes: List<String>, withType: Boolean): String {
     val stringBuilder = StringBuilder()
     classes.forEachIndexed { index, clazz ->

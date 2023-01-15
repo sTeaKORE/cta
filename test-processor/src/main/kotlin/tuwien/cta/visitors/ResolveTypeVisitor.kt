@@ -2,6 +2,11 @@ package tuwien.cta.visitors
 
 import com.google.devtools.ksp.symbol.*
 
+/**
+ * Simple Visitor used for parsing class type (e.g. enum, annotation, ... )
+ *
+ * @constructor Create empty Resolve type visitor
+ */
 class ResolveTypeVisitor : KSVisitor<Unit, String> {
 
     override fun visitAnnotated(annotated: KSAnnotated, data: Unit): String {
@@ -19,6 +24,13 @@ class ResolveTypeVisitor : KSVisitor<Unit, String> {
         return ""
     }
 
+    /**
+     * Visits class declaration and returns type of class or unknown if not clear or expected
+     *
+     * @param classDeclaration ksp class declaration
+     * @param data optional data which can be sent to visitor function
+     * @return class type
+     */
     override fun visitClassDeclaration(classDeclaration: KSClassDeclaration, data: Unit): String {
         return when(classDeclaration.classKind) {
             ClassKind.ENUM_CLASS -> "Enum"
