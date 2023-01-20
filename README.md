@@ -1,7 +1,7 @@
 # Combinatorial Testing Annotations
 
 This library has the purpose of easing the initial threshold of getting into combinatorial testing, by 
-enabling the user to define an input model inside his own code base via annotations and providing an
+enabling the user to define an input model inside his own code base via annotations and providing a
 completely automated process which converts defined input model to running junit 5 tests.
 
 This repository consists of 2 components: cta-processor and demo.
@@ -76,7 +76,7 @@ idea {
 }
 ```
 
-Lastly ensure that you setup junit 5 tests correctly and your setup is complete.
+Lastly ensure that you set up junit 5 tests correctly and your setup is complete.
 
 build.gradle.kts
 ```kotlin
@@ -89,3 +89,59 @@ tasks.test {
 ```
 
 # Documentation
+
+The whole library is centered around annotations which can be seen in this table:
+
+|      Name       | Parameter                                                                                                                                                                                    | Annotation Target |
+|:---------------:|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:-----------------:|
+|     CTATest     | **testContainer** - reference to class which implements test container interface<br/>**classToTest** - reference to classes which should be used as input model (currently only 1 supported) |     Function      |
+|    CTADebug     | -                                                                                                                                                                                            |        Any        |
+|   CTABoolean    | -                                                                                                                                                                                            |        Any        |
+|     CTAEnum     | **values** - list of values for string enums                                                                                                                                                 |        Any        |
+|     CTAInt      | **from** - start of int range<br/> **to** - end of int range<br/> **values** - explicit list of int values                                                                                   |        Any        |
+| CTAConstraints  | **ifConstraints** - list of if constraints                                                                                                                                                   |       Class       |
+| CTAIfConstraint | **constraint** - constraint in string form                                                                                                                                                   |        Any        |
+
+## CTADebug
+This annotation simply enables if the application generates a debug logging file with useful debug logging.
+This log can be found in 
+
+`build/generated/ksp/<main or test>/resources/**.log`
+
+## CTATest
+This annotation defines a combinatorial test case, meaning for each annotation one test file will be generated.
+It needs 2 parameters:
+* **classToTest** - List of classes used for generating the input model for the test. Currently only single class tests are supported. The referenced class is then annotated with value constraint and if constraints.
+* **testContainer** - Reference to test container class which houses the oracle function which decides if a test is successful as well as a reference to the method which will be tested. The referenced class needs to implement the interface of CTATestContainer.kt.
+
+## Value Constraints (CTAInt, CTABoolean, CTAEnum)
+This annotation is used to define and restrict input parameters of the input model and consist of the following variants.
+
+### CTAInt
+Annotation used to annotate integer parameters. These annotations can be used in 2 ways:
+
+* **Int Range**
+  * **from** - starting point of int range
+  * **to** - end point of int range (range is each int between from and to)
+* **Value List**
+  * **values** - explicit list of integer values which are possible
+
+### CTABoolean
+Annotation used to annotate boolean parameters. Boolean parameters only have true or false as possible values.
+
+### CTAEnum
+Annotation used to annotate enum parameters. This annotation can be used to annotate enum classes or strings. Enum classes are automatically
+parsed to collect all possible values. For strings, we need the additional **values** parameter to define the possible values of the string enum.
+
+Note: Currently no inner class enums are supported.
+
+## If Constraints (CTAConstraints, CTAIfConstraint)
+This annotation is used to define if constraints, which describe and restrict the relationship and values of parameters.
+
+### CTAConstraints
+This annotation is more or less a wrapper which just collects all if constraints for a single class.
+It holds a list of constraints within the **ifConstraints** parameter.
+
+### CTAIfConstraint
+This annotation contains a single if constraint within the **constraint** parameter. It is a single string
+written in the ACTS format.
