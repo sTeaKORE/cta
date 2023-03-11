@@ -10,9 +10,10 @@ import kotlin.reflect.KClass
  * Although an arbitrary amount of classes can be defined, currently only singular class tests are supported.
  *
  * Example
- *
+ * ```
  * @CTATest(ContainerClass::class, ClassToTest::class)
  * fun testingClassA() {}
+ * ```
  */
 @Target(allowedTargets = [AnnotationTarget.FUNCTION])
 annotation class CTATest(val testContainer: KClass<out CTATestContainer>, vararg val classToTest: KClass<*>)

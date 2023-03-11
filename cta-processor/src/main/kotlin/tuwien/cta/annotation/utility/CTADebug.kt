@@ -5,8 +5,9 @@ package tuwien.cta.annotation.utility
  * is created.
  *
  * Example
- *
+ * ```
  * @CTADebug
  * class Example {}
+ * ```
  */
 annotation class CTADebug

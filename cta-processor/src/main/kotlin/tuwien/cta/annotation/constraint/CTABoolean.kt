@@ -6,8 +6,9 @@ package tuwien.cta.annotation.constraint
  * Possible Values for Boolean are: true, false.
  *
  * Example
- *
+ * ```
  * @CTABoolean
  * var boolean: Boolean = false
+ * ```
  */
 annotation class CTABoolean
