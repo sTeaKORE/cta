@@ -17,7 +17,7 @@ class TestTemplateSource(
     val testSet: CTATestset,
     val imports: TestTemplateImports,
     val className: CTAFileName,
-    val containerClass: String,
+    val containerClass: CTAFileName,
     val classesToTest: List<String>
 ) {
 

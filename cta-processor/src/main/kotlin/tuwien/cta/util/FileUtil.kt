@@ -65,7 +65,7 @@ class FileUtil(private val codeGenerator: CodeGenerator) {
      * @param containerClass container class from annotation
      * @param classesToTest classes to test from annotation
      */
-    fun generateTestFile(testSet: CTATestset, testName: CTAFileName, containerClass: String, classesToTest: List<KSClassDeclaration>) {
+    fun generateTestFile(testSet: CTATestset, testName: CTAFileName, containerClass: CTAFileName, classesToTest: List<KSClassDeclaration>) {
         val fileName = testName.getTestFileName()
         val packageName = testName.getPackage()
         val testFile = codeGenerator.createNewFile(Dependencies(false), packageName, fileName)

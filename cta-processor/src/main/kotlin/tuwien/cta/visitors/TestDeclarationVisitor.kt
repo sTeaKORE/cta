@@ -102,7 +102,7 @@ class TestDeclarationVisitor(
      * @param annotation annotation from ksp
      * @return container class or null if not found
      */
-    private fun extractContainerClass(annotation: KSAnnotation): String? {
+    private fun extractContainerClass(annotation: KSAnnotation): CTAFileName? {
         val container = annotation.arguments.find {
             val argumentName = it.name
             argumentName != null && argumentName.asString() == CTA_CONTAINER_ARGUMENT
@@ -110,7 +110,7 @@ class TestDeclarationVisitor(
         val containerType = container.value as KSType
         val containerDeclaration = containerType.declaration
         return if (containerDeclaration is KSClassDeclaration) {
-            containerDeclaration.simpleName.asString()
+            extractClassNameAndPackage(containerDeclaration)
         } else {
             null
         }

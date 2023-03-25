@@ -51,6 +51,10 @@ class CTAFileName(
     fun getPackage(): String {
         return packageName
     }
+
+    fun getFileName(): String {
+        return name
+    }
 }
 
 /**

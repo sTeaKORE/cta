@@ -17,7 +17,7 @@ import tuwien.cta.util.CTAFileName
 fun createTestTemplate(
     testSet: CTATestset,
     testName: CTAFileName,
-    containerClass: String,
+    containerClass: CTAFileName,
     classesToTest: List<KSClassDeclaration>
 ): String {
     val imports = TestTemplateImports(classesToTest, testSet.parameters)
@@ -47,6 +47,7 @@ private fun parseTemplate(templateSource: TestTemplateSource): String {
     stringBuilder.append("import org.junit.jupiter.params.provider.Arguments\n")
     stringBuilder.append("import org.junit.jupiter.params.provider.MethodSource\n")
     stringBuilder.append("import java.util.stream.Stream\n")
+    stringBuilder.append("import ${templateSource.containerClass.getPackage()}.${templateSource.containerClass.getFileName()}\n")
 
     for (import in templateSource.imports.getImports()) {
         stringBuilder.append("$import\n")
@@ -61,7 +62,7 @@ private fun parseTemplate(templateSource: TestTemplateSource): String {
     stringBuilder.append(getInputs(templateSource.classesToTest, true))
     stringBuilder.append(") {\n")
     stringBuilder.append("${double_spacer}println(\"Executing automatically generated ct test\")\n")
-    stringBuilder.append("${double_spacer}val testContainer = ${templateSource.containerClass}()\n")
+    stringBuilder.append("${double_spacer}val testContainer = ${templateSource.containerClass.getFileName()}()\n")
     stringBuilder.append("${double_spacer}val inputArray = arrayOf(${getInputs(templateSource.classesToTest, false)}) as Array<Any>\n")
     stringBuilder.append("${double_spacer}if(!testContainer.oracle(testContainer.testMethod, inputArray)) { fail(\"Test failed\") }\n")
     stringBuilder.append("${spacer}}\n")
