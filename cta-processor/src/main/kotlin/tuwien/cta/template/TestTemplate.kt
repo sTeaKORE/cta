@@ -47,7 +47,11 @@ private fun parseTemplate(templateSource: TestTemplateSource): String {
     stringBuilder.append("import org.junit.jupiter.params.provider.Arguments\n")
     stringBuilder.append("import org.junit.jupiter.params.provider.MethodSource\n")
     stringBuilder.append("import java.util.stream.Stream\n")
-    stringBuilder.append("import ${templateSource.containerClass.getPackage()}.${templateSource.containerClass.getFileName()}\n")
+    stringBuilder.append("import ")
+    if(templateSource.containerClass.getPackage().isNotEmpty()) {
+        stringBuilder.append("${templateSource.containerClass.getPackage()}.")
+    }
+    stringBuilder.append("${templateSource.containerClass.getFileName()}\n")
 
     for (import in templateSource.imports.getImports()) {
         stringBuilder.append("$import\n")
