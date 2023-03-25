@@ -47,7 +47,6 @@ private fun parseTemplate(templateSource: TestTemplateSource): String {
     stringBuilder.append("import org.junit.jupiter.params.provider.Arguments\n")
     stringBuilder.append("import org.junit.jupiter.params.provider.MethodSource\n")
     stringBuilder.append("import java.util.stream.Stream\n")
-    stringBuilder.append("import tuwien.cta.demo.FunctionClass\n")
 
     for (import in templateSource.imports.getImports()) {
         stringBuilder.append("$import\n")
