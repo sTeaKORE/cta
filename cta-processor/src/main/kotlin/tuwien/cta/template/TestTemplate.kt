@@ -43,6 +43,7 @@ private fun parseTemplate(templateSource: TestTemplateSource): String {
     stringBuilder.append("package ${templateSource.className.getPackage()}\n")
     stringBuilder.append("\n")
     stringBuilder.append("import org.junit.jupiter.params.ParameterizedTest\n")
+    stringBuilder.append("import org.junit.jupiter.api.fail\n")
     stringBuilder.append("import org.junit.jupiter.params.provider.Arguments\n")
     stringBuilder.append("import org.junit.jupiter.params.provider.MethodSource\n")
     stringBuilder.append("import java.util.stream.Stream\n")
@@ -63,7 +64,7 @@ private fun parseTemplate(templateSource: TestTemplateSource): String {
     stringBuilder.append("${double_spacer}println(\"Executing automatically generated ct test\")\n")
     stringBuilder.append("${double_spacer}val testContainer = ${templateSource.containerClass}()\n")
     stringBuilder.append("${double_spacer}val inputArray = arrayOf(${getInputs(templateSource.classesToTest, false)}) as Array<Any>\n")
-    stringBuilder.append("${double_spacer}testContainer.oracle(testContainer.testMethod, inputArray)\n")
+    stringBuilder.append("${double_spacer}if(!testContainer.oracle(testContainer.testMethod, inputArray)) { fail(\"Test failed\") }\n")
     stringBuilder.append("${spacer}}\n")
     stringBuilder.append("\n")
 
