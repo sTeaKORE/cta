@@ -3,6 +3,8 @@ package tuwien.cta.testset_generation
 import tuwien.cta.input_model.parameters.CTAAbstractParameter
 import tuwien.cta.input_model.parameters.CTAEnumParameter
 import tuwien.cta.input_model.parameters.CTAStringEnumParameter
+import java.lang.Integer.min
+import kotlin.math.ceil
 
 /**
  * helper class containing the test set received from combinatorial testing library
@@ -18,10 +20,14 @@ class CTATestset(val parameters: List<CTAAbstractParameter>, private val testSet
      *
      * @return list of test set entries converted to be used in kt files
      */
-    fun getTestSetArguments(): List<String> {
+    fun getTestSetArguments(part: Int): List<String> {
         val testSetArguments = mutableListOf<String>()
         val stringBuilder = StringBuilder()
-        testSet.forEach { testSetEntry ->
+        val startIndex = 2000 * (part - 1)
+        val endIndex = min(2000 * part, testSet.size)
+        val testSetSlice = testSet.slice(startIndex until endIndex)
+
+        testSetSlice.forEach { testSetEntry ->
             testSetEntry.forEachIndexed { index, testSetValue ->
                 when (val parameter = parameters[index]) {
                     is CTAEnumParameter -> {
@@ -42,6 +48,14 @@ class CTATestset(val parameters: List<CTAAbstractParameter>, private val testSet
             stringBuilder.clear()
         }
         return testSetArguments
+    }
+
+    fun getTestfilesNeeded(): Int {
+        return ceil(testSet.size.toDouble() / 2000.0).toInt();
+    }
+
+    fun getTestSetSize(): Int {
+        return testSet.size
     }
 
     override fun toString(): String {

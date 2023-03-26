@@ -4,11 +4,12 @@ import com.github.doyaaaaaken.kotlincsv.dsl.csvReader
 import com.google.devtools.ksp.processing.CodeGenerator
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.symbol.*
-import tuwien.cta.testset_generation.CTAGeneratorConnector
 import tuwien.cta.input_model.CTAInputModel
+import tuwien.cta.testset_generation.CTAGeneratorConnector
 import tuwien.cta.testset_generation.CTATestset
-import tuwien.cta.util.*
-import java.lang.Exception
+import tuwien.cta.util.CTAFileName
+import tuwien.cta.util.FileUtil
+import tuwien.cta.util.LoggingUtil
 
 /**
  * Entry Point Visitor which orchestrates the whole process. Current process revolves around following steps:
@@ -92,7 +93,7 @@ class TestDeclarationVisitor(
 
         val testSetEntries = csvReader().readAll(testSetFile)
         val testSet = CTATestset(inputModel.getParameters(), testSetEntries)
-        loggingUtil.log("$VISITIOR_NAME.visitAnnotation(${annotation.shortName.asString()}) >>> Generated Testset:\n$testSet")
+        loggingUtil.log("$VISITIOR_NAME.visitAnnotation(${annotation.shortName.asString()}) >>> Generated Testset with length ${testSet.getTestSetSize()}:\n$testSet")
         fileUtil.generateTestFile(testSet, testName, containerClass, inputModelClasses)
     }
 

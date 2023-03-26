@@ -1,7 +1,5 @@
 package tuwien.cta.util
 
-import tuwien.cta.input_model.CTAInputModel
-
 const val CONFIG_FILE_SUFFIX = "ACTSConfig"
 const val OUTPUT_FILE_SUFFIX = "CAGENTestset"
 const val TEST_FILE_SUFFIX = "CTTest"
@@ -46,6 +44,10 @@ class CTAFileName(
      */
     fun getTestFileName(): String {
         return "$name$TEST_FILE_SUFFIX"
+    }
+
+    fun getTestFileNamePart(part: Int): String {
+        return "$name$TEST_FILE_SUFFIX$part"
     }
 
     fun getPackage(): String {

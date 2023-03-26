@@ -18,11 +18,12 @@ fun createTestTemplate(
     testSet: CTATestset,
     testName: CTAFileName,
     containerClass: CTAFileName,
-    classesToTest: List<KSClassDeclaration>
+    classesToTest: List<KSClassDeclaration>,
+    part: Int
 ): String {
     val imports = TestTemplateImports(classesToTest, testSet.parameters)
     val source =
-        TestTemplateSource(testSet, imports, testName, containerClass, classesToTest.map { it.simpleName.asString() })
+        TestTemplateSource(testSet, imports, testName, containerClass, classesToTest.map { it.simpleName.asString() }, part)
 
     return parseTemplate(source)
 }
@@ -58,7 +59,7 @@ private fun parseTemplate(templateSource: TestTemplateSource): String {
     }
 
     stringBuilder.append("\n")
-    stringBuilder.append("class ${templateSource.className.getTestFileName()} {\n")
+    stringBuilder.append("class ${templateSource.className.getTestFileNamePart(templateSource.part)} {\n")
     stringBuilder.append("\n")
     stringBuilder.append("$spacer@ParameterizedTest\n")
     stringBuilder.append("$spacer@MethodSource(\"testArguments\")\n")
@@ -78,7 +79,7 @@ private fun parseTemplate(templateSource: TestTemplateSource): String {
 
     //currently only supporting single test objects
     val classToTest = templateSource.classesToTest[0]
-    templateSource.testSet.getTestSetArguments().forEach {
+    templateSource.testSet.getTestSetArguments(templateSource.part).forEach {
         stringBuilder.append("${triple_spacer}Arguments.of(create${classToTest}(${it})),\n")
     }
 

@@ -66,11 +66,14 @@ class FileUtil(private val codeGenerator: CodeGenerator) {
      * @param classesToTest classes to test from annotation
      */
     fun generateTestFile(testSet: CTATestset, testName: CTAFileName, containerClass: CTAFileName, classesToTest: List<KSClassDeclaration>) {
-        val fileName = testName.getTestFileName()
-        val packageName = testName.getPackage()
-        val testFile = codeGenerator.createNewFile(Dependencies(false), packageName, fileName)
-        val testTemplate = createTestTemplate(testSet, testName, containerClass, classesToTest)
-        testFile.appendText("$testTemplate\n")
-        testFile.close()
+        val testFileCount = testSet.getTestfilesNeeded()
+        for (i in 1..testFileCount) {
+            val fileName = testName.getTestFileNamePart(i)
+            val packageName = testName.getPackage()
+            val testFile = codeGenerator.createNewFile(Dependencies(false), packageName, fileName)
+            val testTemplate = createTestTemplate(testSet, testName, containerClass, classesToTest, i)
+            testFile.appendText("$testTemplate\n")
+            testFile.close()
+        }
     }
 }

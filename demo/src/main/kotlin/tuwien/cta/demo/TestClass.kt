@@ -14,7 +14,7 @@ enum class Example {
 )
 class TestClass {
 
-    @CTAInt(from = 0, to = 10)
+    @CTAInt(from = 0, to = 500)
     var numberWithRange: Int = 1
 
     @CTAInt(values = [0, 1, 2, 3, 4, 5])
