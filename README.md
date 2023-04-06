@@ -67,6 +67,11 @@ dependencies {
 	ksp(project(":<name-of-library-in-gradle>"))
 }
 ```
+```properties
+kotlinVersion=1.6.20
+kspVersion=1.6.20-1.0.4
+```
+
 If there ever arises the need to pass parameters to ksp you can do that by adding
 
 build.gradle.kts
