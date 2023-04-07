@@ -4,6 +4,7 @@ val kotlinVersion: String by project
 plugins {
     kotlin("jvm")
     id("org.jetbrains.dokka") version "1.7.20"
+    id("maven-publish")
 }
 
 group = "tuwien.cta"
@@ -23,5 +24,13 @@ dependencies {
 
 sourceSets.main {
     java.srcDirs("src/main/kotlin")
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("ctannotations") {
+            from(components["java"])
+        }
+    }
 }
 

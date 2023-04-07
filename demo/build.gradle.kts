@@ -8,12 +8,13 @@ version = "1.0-SNAPSHOT"
 
 repositories {
     mavenCentral()
+    mavenLocal()
 }
 
 dependencies {
     implementation(kotlin("stdlib"))
-    implementation(project(":cta-processor"))
-    ksp(project(":cta-processor"))
+    implementation("tuwien.cta:cta-processor:1.0")
+    ksp("tuwien.cta:cta-processor:1.0")
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.1")
     testImplementation("org.junit.jupiter:junit-jupiter-params:5.8.1")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.8.1")
